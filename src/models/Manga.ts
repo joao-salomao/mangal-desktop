@@ -6,13 +6,14 @@ import type {
     AniListTag,
     AniListTitle
 } from '@/services/MangalCliService.ts'
+import DownloadedChapter from '@/models/DownloadedChapter.ts'
 
 export default class Manga {
     id?: number
     title: string
     source: string
-    createdAt?: Date
-    updatedAt?: Date
+    createdAt?: string
+    updatedAt?: string
     metadata: {
         genres: string[]
         summary: string
@@ -72,24 +73,26 @@ export default class Manga {
         externalLinks: string[];
     }
 
+    downloadedChapters?: Array<DownloadedChapter>
+
     public constructor(params: {
         id?: number,
         title: string,
         source: string,
         metadata: Manga['metadata'],
         anilist?: Manga['anilist'],
-        createdAt?: Date,
-        updatedAt?: Date,
+        createdAt?: string,
+        updatedAt?: string,
     }) {
-        this.id = params.id ?? null
+        this.id = params?.id
         this.title = params.title
         this.source = params.source
         this.metadata = params.metadata
-        this.createdAt = params.createdAt ?? null
-        this.updatedAt = params.updatedAt ?? null
+        this.createdAt = params?.createdAt
+        this.updatedAt = params?.updatedAt
     }
 
-    public static fromDatabaseRow(row: object): Manga {
+    public static fromDatabaseRow(row: { [key: string]: any }): Manga {
         return new Manga({
             id: row.id,
             title: row.title,

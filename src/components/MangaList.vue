@@ -12,6 +12,20 @@
                 <p class="name">{{ item.title }}</p>
                 <p class="summary">{{ item.metadata.summary }}</p>
 
+                <div v-if="item.downloadedChapters?.length" class="downloaded-chapters">
+                    <p>Downloaded chapters</p>
+                    <div>
+                        <Button
+                            v-for="chapter in item.downloadedChapters"
+                            :key="chapter.id"
+                            size="small"
+                            :label="chapter.chapter.toString()"
+                            v-tooltip.top="'Open chapter'"
+                            @click="openDownloadedChapterFile(chapter)"
+                        />
+                    </div>
+                </div>
+
                 <div class="actions">
                     <Button size="small" label="Download" @click="download(item)"/>
                     <Button size="small" label="Add to Library" @click="addToLibrary(item)"/>
@@ -30,6 +44,8 @@ import {QueryResult} from '@/services/MangalCliService.ts'
 import {MangaService} from '@/services/MangaService.ts'
 import {DownloadFolderNotSetError} from '@/errors'
 import {useToast} from 'primevue/usetoast'
+import type DownloadedChapter from '@/models/DownloadedChapter'
+import FileService from '@/services/FileService.ts'
 
 defineProps<{
     mangas: Manga[]
@@ -50,7 +66,7 @@ function openAnilistPage(item: QueryResult['result'][0]) {
 
 async function download(item: QueryResult['result'][0]) {
     try {
-        await MangaService.getInstance().download(item, 0)
+        await MangaService.getInstance().download(item, 2)
     } catch (e: any) {
         if (e instanceof DownloadFolderNotSetError) {
             toast.add({
@@ -72,6 +88,10 @@ async function download(item: QueryResult['result'][0]) {
 
 async function addToLibrary(manga: Manga) {
     await MangaService.getInstance().addToLibrary(manga)
+}
+
+function openDownloadedChapterFile(chapter: DownloadedChapter) {
+    FileService.getInstance().openFileWithDefaultHandler(chapter.path)
 }
 </script>
 <style scoped>
@@ -99,6 +119,20 @@ async function addToLibrary(manga: Manga) {
 
                 .summary {
                     margin-bottom: 20px;
+                }
+
+                .downloaded-chapters {
+                    margin-bottom: 20px;
+
+                    p {
+                        font-weight: bold;
+                        margin-bottom: 5px;
+                    }
+
+                    div {
+                        display: flex;
+                        gap: 5px;
+                    }
                 }
 
                 .actions {

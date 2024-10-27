@@ -3,6 +3,8 @@ import Manga from '@/models/Manga'
 import Database from '@tauri-apps/plugin-sql'
 import {MangaNotInLibraryError, DownloadFolderNotSetError} from '@/errors'
 import SettingsService from '@/services/SettingsService'
+import {pluck, chunk} from '@/utils/array'
+import DownloadedChapter from '@/models/DownloadedChapter.ts'
 
 export class MangaService {
     private static instance: MangaService
@@ -35,13 +37,15 @@ export class MangaService {
             throw new DownloadFolderNotSetError()
         }
 
+        // TODO: if the chapter is already downloaded, don't create a new entry in the database. Use the existing one.
+
         const chapterIndex = chapter - 1
         const filePath = await this.mangalCliService.download(mangaFromLibrary.title, mangaFromLibrary.source, chapterIndex, downloadFolder)
 
         const db = await this.getDatabase()
         await db.execute(
-            'INSERT INTO downloaded_chapters(mangaId, chapter, path, lastDownloadedAt, createdAt) VALUES($1, $2, $3, $4)',
-            [mangaFromLibrary.id, chapter, filePath, new Date().toISOString(), new Date().toISOString()],
+            'INSERT INTO downloaded_chapters(mangaId, chapter, path, lastDownloadedAt, createdAt) VALUES($1, $2, $3, $4, $5)',
+            [mangaFromLibrary.id, chapter, filePath.trim(), new Date().toISOString(), new Date().toISOString()],
         )
     }
 
@@ -58,8 +62,34 @@ export class MangaService {
      */
     public async list(): Promise<Manga[]> {
         const db = await this.getDatabase()
-        const result: object[] = await db.select('SELECT * FROM mangas')
-        return result.map(Manga.fromDatabaseRow)
+        const result: Array<{ [key: string]: any }> = await db.select('SELECT * FROM mangas')
+
+        const downloadedChaptersPromises = chunk(pluck(result, 'id'), 500).map((ids: number[]) => {
+            return db.select(`SELECT *
+                              FROM downloaded_chapters
+                              WHERE mangaId IN (${ids.join(',')})`)
+        })
+
+        const downloadedChapters = (await Promise.all(downloadedChaptersPromises)).flat() as Array<{
+            [key: string]: any
+        }>
+
+        const downloadedChaptersByMangaId: Record<number, DownloadedChapter[]> = downloadedChapters
+            .reduce((acc: Record<number, DownloadedChapter[]>, chapter: { [key: string]: any }) => {
+                if (!acc[chapter.mangaId]) {
+                    acc[chapter.mangaId] = []
+                }
+
+                acc[chapter.mangaId].push(DownloadedChapter.fromDatabaseRow(chapter))
+
+                return acc
+            }, {})
+
+        return result.map((row: { [key: string]: any }) => {
+            const manga = Manga.fromDatabaseRow(row)
+            manga.downloadedChapters = downloadedChaptersByMangaId[manga.id!] ?? []
+            return manga
+        })
     }
 
     /**
