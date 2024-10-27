@@ -40,12 +40,12 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
 import type Manga from '@/models/Manga.ts'
-import {QueryResult} from '@/services/MangalCliService.ts'
-import {MangaService} from '@/services/MangaService.ts'
+import {QueryResult} from '@/services/MangalCliService'
+import {MangaService} from '@/services/MangaService'
 import {DownloadFolderNotSetError} from '@/errors'
 import {useToast} from 'primevue/usetoast'
 import type DownloadedChapter from '@/models/DownloadedChapter'
-import FileService from '@/services/FileService.ts'
+import {openFileWithDefaultHandler} from '@/services/fileService'
 
 defineProps<{
     mangas: Manga[]
@@ -91,7 +91,7 @@ async function addToLibrary(manga: Manga) {
 }
 
 function openDownloadedChapterFile(chapter: DownloadedChapter) {
-    FileService.getInstance().openFileWithDefaultHandler(chapter.path)
+    openFileWithDefaultHandler(chapter.path)
 }
 </script>
 <style scoped>

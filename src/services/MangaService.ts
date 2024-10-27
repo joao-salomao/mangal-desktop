@@ -4,7 +4,7 @@ import Database from '@tauri-apps/plugin-sql'
 import {MangaNotInLibraryError, DownloadFolderNotSetError} from '@/errors'
 import SettingsService from '@/services/SettingsService'
 import {pluck, chunk} from '@/utils/array'
-import DownloadedChapter from '@/models/DownloadedChapter.ts'
+import DownloadedChapter from '@/models/DownloadedChapter'
 
 export class MangaService {
     private static instance: MangaService

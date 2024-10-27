@@ -2,11 +2,10 @@ use tauri_plugin_sql::{Migration, MigrationKind};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let migrations = vec![
-        Migration {
-            version: 1,
-            description: "create_initial_tables",
-            sql: r#"
+    let migrations = vec![Migration {
+        version: 1,
+        description: "create_initial_tables",
+        sql: r#"
                 CREATE TABLE mangas (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     title TEXT NOT NULL,
@@ -33,12 +32,16 @@ pub fn run() {
                 CREATE INDEX downloaded_chapters_mangaId_index ON downloaded_chapters (mangaId);
                 CREATE INDEX downloaded_chapters_mangaId_and_chapter_index ON downloaded_chapters (mangaId, chapter);
             "#,
-            kind: MigrationKind::Up,
-        }
-    ];
+        kind: MigrationKind::Up,
+    }];
 
     tauri::Builder::default()
-        .plugin(tauri_plugin_sql::Builder::new().add_migrations("sqlite:database.bin", migrations).build())
+        .plugin(tauri_plugin_os::init())
+        .plugin(
+            tauri_plugin_sql::Builder::new()
+                .add_migrations("sqlite:database.bin", migrations)
+                .build(),
+        )
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())

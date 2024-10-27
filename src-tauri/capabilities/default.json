@@ -35,7 +35,32 @@
           "name": "xdg-open",
           "cmd": "xdg-open",
           "args": true,
-          "sidecar": false
+          "sidecar": false,
+          "platforms": ["linux"]
+        }
+      ]
+    },
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "open",
+          "cmd": "open",
+          "args": true,
+          "sidecar": false,
+          "platforms": ["macos"]
+        }
+      ]
+    },
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "start",
+          "cmd": "start",
+          "args": true,
+          "sidecar": false,
+          "platforms": ["windows"]
         }
       ]
     },
@@ -45,6 +70,7 @@
     "dialog:default",
     "store:default",
     "sql:default",
-    "sql:allow-execute"
+    "sql:allow-execute",
+    "os:default"
   ]
 }
