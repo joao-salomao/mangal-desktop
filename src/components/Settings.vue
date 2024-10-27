@@ -12,7 +12,10 @@ import SettingsService from '@/services/SettingsService'
 const folder = ref<string | null>(null)
 
 async function updateDownloadFolder() {
-    folder.value = await SettingsService.getInstance().updateDownloadFolder()
+    const newFolder = await SettingsService.getInstance().updateDownloadFolder()
+    if (newFolder) {
+        folder.value = newFolder
+    }
 }
 
 onMounted(async () => {

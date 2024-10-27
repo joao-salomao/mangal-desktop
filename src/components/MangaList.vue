@@ -6,7 +6,7 @@
         class="manga-container"
     >
         <div class="manga-details">
-            <img :src="item.metadata.cover.large" :alt="item.name" class="cover-image"/>
+            <img :src="item.metadata.cover.large" :alt="item.title" class="cover-image"/>
 
             <div class="info">
                 <p class="name">{{ item.title }}</p>
@@ -40,7 +40,6 @@
 </div>
 </template>
 <script setup lang="ts">
-import type {QueryResult} from '@/services/MangalCliService'
 import type DownloadedChapter from '@/models/DownloadedChapter'
 import type Manga from '@/models/Manga'
 import {ref} from 'vue'
@@ -54,9 +53,9 @@ defineProps<{ mangas: Manga[] }>()
 const showDownloadDialog = ref(false)
 const selectedManga = ref<Manga | null>(null)
 
-function openAnilistPage(item: QueryResult['result'][0]) {
+function openAnilistPage(manga: Manga) {
     const element = document.createElement('a')
-    element.href = item.anilist.siteUrl
+    element.href = manga.anilist!.siteUrl
     element.target = '_blank'
 
     document.body.appendChild(element)

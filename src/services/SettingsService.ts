@@ -22,7 +22,7 @@ export default class SettingsService {
 
         if (!newPath) {
             await message(`No folder selected.`, {title: 'Warning', kind: 'warning'})
-            return
+            return null
         }
 
         await KeyValueDatabase.getInstance().set(DOWNLOAD_FOLDER_KEY, newPath)
