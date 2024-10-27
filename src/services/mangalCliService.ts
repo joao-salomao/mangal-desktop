@@ -1,56 +1,36 @@
 import {Command} from '@tauri-apps/plugin-shell'
+import * as logger from '@/services/logService'
 import type {SpawnOptions} from '@tauri-apps/plugin-shell'
-import LogService from '@/services/LogService.ts'
 
-export default class MangalCliService {
-    private static instance: MangalCliService | null = null
-    private logger: LogService = LogService.getInstance()
+export async function download(title: string, source: string, chapterIndex: number, downloadFolder: string): Promise<string> {
+    const args = ['inline', '--source', source, '--query', title, '--manga', 'exact', '--chapters', chapterIndex.toString(), '--format', 'pdf', '--download']
+    return await runCommand(args, {cwd: downloadFolder})
+}
 
-    private constructor() {
-    }
+export async function search(search: string, source: string): Promise<QueryResult> {
+    await logger.info('MangalCliService| Searching for manga: ' + search + ' on ' + source)
 
-    public static getInstance(): MangalCliService {
-        if (!MangalCliService.instance) {
-            MangalCliService.instance = new MangalCliService()
-        }
+    const args = ['inline', '--fetch-metadata', '--include-anilist-manga', '--source', source, '--query', search, '-j']
+    const output = await runCommand(args)
 
-        return MangalCliService.instance
-    }
+    return JSON.parse(output) as unknown as QueryResult
+}
 
-    public async search(search: string, source: string): Promise<QueryResult> {
-        await this.logger.info('MangalCliService| Searching for manga: ' + search + ' on ' + source)
+async function runCommand(args: string | string[], options: SpawnOptions = {}): Promise<string> {
+    const command = Command.sidecar('binaries/mangal-cli', args, options)
+    await command.spawn()
 
-        const args = ['inline', '--fetch-metadata', '--include-anilist-manga', '--source', source, '--query', search, '-j']
-        const output = await this.runCommand(args)
-
-        return JSON.parse(output) as unknown as QueryResult
-    }
-
-    /**
-     * It downloads a manga chapter using the Mangal CLI service storing it in the download folder set in the settings.
-     * The return value is the path to the downloaded file.
-     */
-    public async download(title: string, source: string, chapterIndex: number, downloadFolder: string): Promise<string> {
-        const args = ['inline', '--source', source, '--query', title, '--manga', 'exact', '--chapters', chapterIndex.toString(), '--format', 'pdf', '--download']
-        return await this.runCommand(args, {cwd: downloadFolder})
-    }
-
-    private async runCommand(args: string | string[], options: SpawnOptions = {}): Promise<string> {
-        const command = Command.sidecar('binaries/mangal-cli', args, options)
-        await command.spawn()
-
-        return new Promise((resolve, reject) => {
-            command.stdout.on('data', (data) => {
-                this.logger.info('Command successfully executed:', args, data)
-                resolve(data)
-            })
-
-            command.stderr.on('data', (data) => {
-                this.logger.error('Error while executing command:', args, data)
-                reject(data)
-            })
+    return new Promise((resolve, reject) => {
+        command.stdout.on('data', (data) => {
+            logger.info('Command successfully executed:', args, data)
+            resolve(data)
         })
-    }
+
+        command.stderr.on('data', (data) => {
+            logger.error('Error while executing command:', args, data)
+            reject(data)
+        })
+    })
 }
 
 export interface MangaMetadata {

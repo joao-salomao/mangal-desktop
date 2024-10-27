@@ -1,9 +1,9 @@
 import {Command} from '@tauri-apps/plugin-shell'
-import * as os from '@tauri-apps/plugin-os'
+import {platform as getPlatform} from '@tauri-apps/plugin-os'
 import type {Platform} from '@tauri-apps/plugin-os'
 
 export async function openFileWithOSDefaultHandler(filePath: string): Promise<void> {
-    const platform: Platform = await os.platform()
+    const platform: Platform = await getPlatform()
     const handlerByPlatform: Record<string, string> = {
         linux: 'xdg-open',
         macos: 'open',

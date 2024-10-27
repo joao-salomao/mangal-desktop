@@ -30,7 +30,7 @@ import Checkbox from 'primevue/checkbox'
 import {useVModel} from '@vueuse/core'
 import type Manga from '@/models/Manga'
 import {ref} from 'vue'
-import {MangaService} from '@/services/MangaService'
+import * as mangaService from '@/services/mangaService'
 import {DownloadFolderNotSetError} from '@/errors'
 import {useToast} from 'primevue/usetoast'
 
@@ -67,7 +67,7 @@ async function downloadSelectedChapters() {
     try {
         isDownloading.value = true
         for (const [index, chapter] of chapters.entries()) {
-            await MangaService.getInstance().download(props.manga!, chapter)
+            await mangaService.download(props.manga!, chapter)
             downloadProgress.value = Math.round((index + 1) / chapters.length * 100)
         }
     } catch (e: any) {

@@ -1,24 +1,24 @@
 <template>
 <div>
     <p>Download folder: <small>{{ folder }}</small></p>
-    <Button label="Change" size="small" @click="updateDownloadFolder"/>
+    <Button label="Change" size="small" @click="callUpdateDownloadFolder"/>
 </div>
 </template>
 <script setup lang="ts">
 import {onMounted, ref} from 'vue'
 import Button from 'primevue/button'
-import SettingsService from '@/services/SettingsService'
+import {updateDownloadFolder, getDownloadFolder} from '@/services/settingsService'
 
 const folder = ref<string | null>(null)
 
-async function updateDownloadFolder() {
-    const newFolder = await SettingsService.getInstance().updateDownloadFolder()
+async function callUpdateDownloadFolder() {
+    const newFolder = await updateDownloadFolder()
     if (newFolder) {
         folder.value = newFolder
     }
 }
 
 onMounted(async () => {
-    folder.value = await SettingsService.getInstance().getDownloadFolder()
+    folder.value = await getDownloadFolder()
 })
 </script>

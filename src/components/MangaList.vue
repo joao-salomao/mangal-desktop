@@ -28,7 +28,7 @@
 
                 <div class="actions">
                     <Button size="small" label="Download" @click="openDownloadDialog(item)"/>
-                    <Button size="small" label="Add to Library" @click="addToLibrary(item)"/>
+                    <Button size="small" label="Add to Library" @click="addToLibraryHandler(item)"/>
                     <Button v-if="item.anilist?.siteUrl" size="small" label="AniList page"
                             @click="openAnilistPage(item)"/>
                 </div>
@@ -44,11 +44,14 @@ import type DownloadedChapter from '@/models/DownloadedChapter'
 import type Manga from '@/models/Manga'
 import {ref} from 'vue'
 import Button from 'primevue/button'
-import {MangaService} from '@/services/MangaService'
+import {addToLibrary} from '@/services/mangaService'
 import {openFileWithOSDefaultHandler} from '@/services/fileService'
 import DownloadMangaChaptersDialog from '@/components/DownloadMangaChaptersDialog.vue'
+import {useToast} from 'primevue/usetoast'
 
 defineProps<{ mangas: Manga[] }>()
+
+const toast = useToast()
 
 const showDownloadDialog = ref(false)
 const selectedManga = ref<Manga | null>(null)
@@ -65,8 +68,21 @@ function openAnilistPage(manga: Manga) {
 }
 
 
-async function addToLibrary(manga: Manga) {
-    await MangaService.getInstance().addToLibrary(manga)
+async function addToLibraryHandler(manga: Manga) {
+    try {
+        await addToLibrary(manga)
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: `Manga ${manga.title} added to your library`
+        })
+    } catch (e: any) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'An error occurred while adding the manga to the library: ' + e.toString()
+        })
+    }
 }
 
 function openDownloadedChapterFile(chapter: DownloadedChapter) {
