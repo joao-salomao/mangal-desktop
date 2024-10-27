@@ -11,6 +11,7 @@ pub fn run() {
                     title TEXT NOT NULL,
                     source TEXT NOT NULL,
                     metadata TEXT NOT NULL,
+                    anilist TEXT DEFAULT NULL,
                     createdAt TEXT NOT NULL,
                     updatedAt TEXT NOT NULL
                 );

@@ -1,5 +1,5 @@
 <template>
-<MangaList :mangas="libraryStore.mangas"/>
+<MangaList :mangas="libraryStore.mangas" :allow-download="true"/>
 </template>
 <script setup lang="ts">
 import {onMounted} from 'vue'

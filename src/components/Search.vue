@@ -5,10 +5,11 @@
         <Dropdown v-model="searchStore.form.source" :options="sourceOptions" style="max-width: 200px"/>
         <InputGroupAddon>Name</InputGroupAddon>
         <InputText v-model="searchStore.form.search" style="max-width: 500px"/>
-        <Button label="Search" :loading="searchStore.loading" :disabled="searchStore.loading" @click="searchStore.search"/>
+        <Button label="Search" :loading="searchStore.loading" :disabled="searchStore.loading"
+                @click="searchStore.search"/>
     </InputGroup>
 
-    <MangaList :mangas="searchStore.mangas"/>
+    <MangaList :mangas="searchStore.mangas" :allow-add-to-library="true"/>
 </div>
 </template>
 

@@ -11,7 +11,7 @@ export async function updateDownloadFolder(): Promise<string | null> {
         return null
     }
 
-    set(DOWNLOAD_FOLDER_KEY, newPath)
+    await set(DOWNLOAD_FOLDER_KEY, newPath)
 
     return getDownloadFolder()
 }

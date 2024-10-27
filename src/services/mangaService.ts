@@ -87,10 +87,14 @@ export async function list(): Promise<Manga[]> {
  */
 export async function addToLibrary(manga: Manga): Promise<number> {
     const result = await db.execute(
-        'INSERT INTO mangas(title, source, metadata, createdAt, updatedAt) VALUES($1, $2, $3, $4, $5)',
+        'INSERT INTO mangas(title, source, metadata, anilist, createdAt, updatedAt) VALUES($1, $2, $3, $4, $5, $6)',
         [
-            manga.title, manga.source, JSON.stringify(manga.metadata),
-            new Date().toISOString(), new Date().toISOString()
+            manga.title,
+            manga.source,
+            JSON.stringify(manga.metadata),
+            manga.anilist ? JSON.stringify(manga.anilist) : null,
+            new Date().toISOString(),
+            new Date().toISOString()
         ],
     )
 

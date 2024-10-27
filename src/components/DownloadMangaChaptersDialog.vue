@@ -1,5 +1,5 @@
 <template>
-<Dialog v-model:visible="visibleModel" :modal="true" :header="manga?.title"
+<Dialog v-model:visible="visibleModel" :modal="true" :header="manga?.title" :closable="!isDownloading"
         content-style="width: 600px">
     <div class="download-chapters-container">
         <div class="download-chapters-list">
@@ -14,16 +14,17 @@
                 <Checkbox v-model="chaptersToDownload[chapter]" :input-id="`chapter-${chapter}`" :binary="true"/>
             </div>
         </div>
-
-        <ProgressBar v-if="isDownloading" :value="downloadProgress"/>
-
-        <Button class="download-button" label="Download" :disabled="isDownloading" :loading="isDownloading"
-                @click="downloadSelectedChapters"/>
     </div>
+
+    <template #footer>
+        <Button class="download-button"
+                :label="isDownloading ? `Download (${downloadProgress}%)` : 'Download'"
+                :disabled="isDownloading" :loading="isDownloading"
+                @click="downloadSelectedChapters"/>
+    </template>
 </Dialog>
 </template>
 <script setup lang="ts">
-import ProgressBar from 'primevue/progressbar'
 import Dialog from 'primevue/dialog'
 import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
@@ -33,6 +34,7 @@ import {ref} from 'vue'
 import * as mangaService from '@/services/mangaService'
 import {DownloadFolderNotSetError} from '@/errors'
 import {useToast} from 'primevue/usetoast'
+import {useLibraryStore} from '@/composables/useLibraryStore.ts'
 
 const props = defineProps<{
     visible: boolean,
@@ -40,7 +42,9 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['update:visible'])
+
 const toast = useToast()
+const libraryStore = useLibraryStore()
 
 const visibleModel = useVModel(props, 'visible', emit)
 const chaptersToDownload = ref<Record<number, boolean>>({})
@@ -88,6 +92,8 @@ async function downloadSelectedChapters() {
         }
     } finally {
         isDownloading.value = false
+        downloadProgress.value = 0
+        libraryStore.fetchLibrary()
         toast.add({
             severity: 'success',
             summary: 'Download finished',
@@ -99,26 +105,27 @@ async function downloadSelectedChapters() {
 </script>
 
 <style scoped>
-
 .download-chapters-container {
     display: flex;
     flex-direction: column;
     gap: 10px;
 
-    .download-button {
-        align-self: flex-end;
-    }
-
     .download-chapters-list {
         display: flex;
         gap: 10px;
+        max-height: 400px;
         flex-wrap: wrap;
         align-items: center;
+        justify-content: space-between;
 
         .chapter {
             display: flex;
             gap: 3px;
         }
     }
+}
+
+.download-button {
+    align-self: flex-end;
 }
 </style>

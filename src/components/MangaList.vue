@@ -27,8 +27,13 @@
                 </div>
 
                 <div class="actions">
-                    <Button size="small" label="Download" @click="openDownloadDialog(item)"/>
-                    <Button size="small" label="Add to Library" @click="addToLibraryHandler(item)"/>
+                    <Button v-if="allowDownload" size="small" label="Download"
+                            v-tooltip="!item.chaptersCount ? 'There are no chapters available for download' : null"
+                            @click="openDownloadDialog(item)"/>
+
+                    <Button v-if="allowAddToLibrary" size="small" label="Add to Library"
+                            @click="addToLibraryHandler(item)"/>
+
                     <Button v-if="item.anilist?.siteUrl" size="small" label="AniList page"
                             @click="openAnilistPage(item)"/>
                 </div>
@@ -40,6 +45,7 @@
 </div>
 </template>
 <script setup lang="ts">
+import type {PropType} from 'vue'
 import type DownloadedChapter from '@/models/DownloadedChapter'
 import type Manga from '@/models/Manga'
 import {ref} from 'vue'
@@ -49,7 +55,20 @@ import {openFileWithOSDefaultHandler} from '@/services/fileService'
 import DownloadMangaChaptersDialog from '@/components/DownloadMangaChaptersDialog.vue'
 import {useToast} from 'primevue/usetoast'
 
-defineProps<{ mangas: Manga[] }>()
+defineProps({
+    mangas: {
+        type: Array as PropType<Manga[]>,
+        required: true
+    },
+    allowAddToLibrary: {
+        type: Boolean,
+        default: false
+    },
+    allowDownload: {
+        type: Boolean,
+        default: false
+    }
+})
 
 const toast = useToast()
 
@@ -74,13 +93,15 @@ async function addToLibraryHandler(manga: Manga) {
         toast.add({
             severity: 'success',
             summary: 'Success',
-            detail: `Manga ${manga.title} added to your library`
+            detail: `Manga ${manga.title} added to your library`,
+            life: 4000
         })
     } catch (e: any) {
         toast.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'An error occurred while adding the manga to the library: ' + e.toString()
+            detail: 'An error occurred while adding the manga to the library: ' + e.toString(),
+            life: 5000
         })
     }
 }
@@ -90,6 +111,10 @@ function openDownloadedChapterFile(chapter: DownloadedChapter) {
 }
 
 function openDownloadDialog(manga: Manga) {
+    if (!manga.chaptersCount) {
+        return
+    }
+
     selectedManga.value = manga
     showDownloadDialog.value = true
 }
@@ -107,6 +132,8 @@ function openDownloadDialog(manga: Manga) {
             gap: 20px;
 
             .cover-image {
+                width: 100%;
+                height: 100%;
                 border-radius: 10px;
                 box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
             }
@@ -131,6 +158,7 @@ function openDownloadDialog(manga: Manga) {
 
                     div {
                         display: flex;
+                        flex-wrap: wrap;
                         gap: 5px;
                     }
                 }

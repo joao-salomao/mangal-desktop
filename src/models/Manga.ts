@@ -2,10 +2,11 @@ import type {
     Result,
     AniListCharacter,
     AniListCoverImage,
-    AniListStaff, AniListStartDate,
+    AniListStaff,
+    AniListStartDate,
     AniListTag,
     AniListTitle
-} from '@/services/MangalCliService.ts'
+} from '@/services/mangalCliService'
 import DownloadedChapter from '@/models/DownloadedChapter.ts'
 
 export default class Manga {
@@ -88,8 +89,9 @@ export default class Manga {
         this.title = params.title
         this.source = params.source
         this.metadata = params.metadata
-        this.createdAt = params?.createdAt
-        this.updatedAt = params?.updatedAt
+        this.anilist = params.anilist
+        this.createdAt = params.createdAt
+        this.updatedAt = params.updatedAt
     }
 
     public static fromDatabaseRow(row: { [key: string]: any }): Manga {
@@ -98,6 +100,7 @@ export default class Manga {
             title: row.title,
             source: row.source,
             metadata: JSON.parse(row.metadata),
+            anilist: row.anilist ? JSON.parse(row.anilist) : undefined,
             createdAt: row.createdAt,
             updatedAt: row.updatedAt,
         })
