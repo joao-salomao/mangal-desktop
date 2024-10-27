@@ -20,14 +20,14 @@
                             :key="chapter.id"
                             size="small"
                             :label="chapter.chapter.toString()"
-                            v-tooltip.top="'Open chapter'"
+                            v-tooltip.top="`Open chapter ${chapter.chapter}: ${chapter.path}`"
                             @click="openDownloadedChapterFile(chapter)"
                         />
                     </div>
                 </div>
 
                 <div class="actions">
-                    <Button size="small" label="Download" @click="download(item)"/>
+                    <Button size="small" label="Download" @click="openDownloadDialog(item)"/>
                     <Button size="small" label="Add to Library" @click="addToLibrary(item)"/>
                     <Button v-if="item.anilist?.siteUrl" size="small" label="AniList page"
                             @click="openAnilistPage(item)"/>
@@ -35,23 +35,24 @@
             </div>
         </div>
     </div>
+
+    <DownloadMangaChaptersDialog v-model:visible="showDownloadDialog" :manga="selectedManga"/>
 </div>
 </template>
 <script setup lang="ts">
-import Button from 'primevue/button'
-import type Manga from '@/models/Manga.ts'
-import {QueryResult} from '@/services/MangalCliService'
-import {MangaService} from '@/services/MangaService'
-import {DownloadFolderNotSetError} from '@/errors'
-import {useToast} from 'primevue/usetoast'
+import type {QueryResult} from '@/services/MangalCliService'
 import type DownloadedChapter from '@/models/DownloadedChapter'
-import {openFileWithDefaultHandler} from '@/services/fileService'
+import type Manga from '@/models/Manga'
+import {ref} from 'vue'
+import Button from 'primevue/button'
+import {MangaService} from '@/services/MangaService'
+import {openFileWithOSDefaultHandler} from '@/services/fileService'
+import DownloadMangaChaptersDialog from '@/components/DownloadMangaChaptersDialog.vue'
 
-defineProps<{
-    mangas: Manga[]
-}>()
+defineProps<{ mangas: Manga[] }>()
 
-const toast = useToast()
+const showDownloadDialog = ref(false)
+const selectedManga = ref<Manga | null>(null)
 
 function openAnilistPage(item: QueryResult['result'][0]) {
     const element = document.createElement('a')
@@ -64,34 +65,18 @@ function openAnilistPage(item: QueryResult['result'][0]) {
     element.remove()
 }
 
-async function download(item: QueryResult['result'][0]) {
-    try {
-        await MangaService.getInstance().download(item, 2)
-    } catch (e: any) {
-        if (e instanceof DownloadFolderNotSetError) {
-            toast.add({
-                severity: 'error',
-                summary: 'Download folder not set',
-                detail: 'Please set the download folder in the settings page',
-                life: 5_000
-            })
-        } else {
-            toast.add({
-                severity: 'error',
-                summary: 'Something went wrong',
-                detail: e.toString(),
-                life: 10_000
-            })
-        }
-    }
-}
 
 async function addToLibrary(manga: Manga) {
     await MangaService.getInstance().addToLibrary(manga)
 }
 
 function openDownloadedChapterFile(chapter: DownloadedChapter) {
-    openFileWithDefaultHandler(chapter.path)
+    openFileWithOSDefaultHandler(chapter.path)
+}
+
+function openDownloadDialog(manga: Manga) {
+    selectedManga.value = manga
+    showDownloadDialog.value = true
 }
 </script>
 <style scoped>
@@ -143,4 +128,5 @@ function openDownloadedChapterFile(chapter: DownloadedChapter) {
         }
     }
 }
+
 </style>

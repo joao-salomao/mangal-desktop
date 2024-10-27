@@ -111,4 +111,8 @@ export default class Manga {
             metadata: result.mangal.metadata
         })
     }
+
+    public get chaptersCount(): number {
+        return this.metadata.chapters ?? this.anilist?.chapters ?? 0
+    }
 }

@@ -43,10 +43,22 @@ export class MangaService {
         const filePath = await this.mangalCliService.download(mangaFromLibrary.title, mangaFromLibrary.source, chapterIndex, downloadFolder)
 
         const db = await this.getDatabase()
-        await db.execute(
-            'INSERT INTO downloaded_chapters(mangaId, chapter, path, lastDownloadedAt, createdAt) VALUES($1, $2, $3, $4, $5)',
-            [mangaFromLibrary.id, chapter, filePath.trim(), new Date().toISOString(), new Date().toISOString()],
-        )
+
+        const existingChapter: Array<{
+            [key: string]: any
+        }> = await db.select('SELECT * FROM downloaded_chapters WHERE mangaId = $1 AND chapter = $2', [mangaFromLibrary.id, chapter])
+
+        if (existingChapter.length) {
+            await db.execute(
+                'UPDATE downloaded_chapters SET path = $1, lastDownloadedAt = $2 WHERE id = $3',
+                [filePath.trim(), new Date().toISOString(), existingChapter[0].id],
+            )
+        } else {
+            await db.execute(
+                'INSERT INTO downloaded_chapters(mangaId, chapter, path, lastDownloadedAt, createdAt) VALUES($1, $2, $3, $4, $5)',
+                [mangaFromLibrary.id, chapter, filePath.trim(), new Date().toISOString(), new Date().toISOString()],
+            )
+        }
     }
 
     /**
