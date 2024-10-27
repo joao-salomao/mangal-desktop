@@ -1,7 +1,7 @@
 export default class DownloadedChapter {
     id: number
     mangaId: number
-    chapter: string
+    chapter: number
     path: string
     createdAt: string
     lastDownloadedAt: string
@@ -16,7 +16,7 @@ export default class DownloadedChapter {
     }) {
         this.id = params.id
         this.mangaId = params.mangaId
-        this.chapter = params.chapter
+        this.chapter = parseInt(params.chapter)
         this.path = params.path
         this.createdAt = params.createdAt
         this.lastDownloadedAt = params.lastDownloadedAt

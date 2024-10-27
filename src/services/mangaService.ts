@@ -77,7 +77,7 @@ export async function list(): Promise<Manga[]> {
 
     return result.map((row: { [key: string]: any }) => {
         const manga = Manga.fromDatabaseRow(row)
-        manga.downloadedChapters = downloadedChaptersByMangaId[manga.id!] ?? []
+        manga.downloadedChapters = (downloadedChaptersByMangaId[manga.id!] ?? []).sort((a, b) => a.chapter - b.chapter)
         return manga
     })
 }
