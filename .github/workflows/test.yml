@@ -12,6 +12,9 @@ jobs:
   test-rust:
     runs-on: ubuntu-latest
     steps:
+      - name: Install libgtk-3-dev
+        run : sudo apt-get install libgtk-3-dev
+
       - name: Checkout
         uses: actions/checkout@v4
 
