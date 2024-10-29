@@ -1,6 +1,6 @@
-import {defineStore} from 'pinia'
 import {ref} from 'vue'
-import {list} from '@/services/mangaService'
+import {defineStore} from 'pinia'
+import * as mangaService from '@/services/mangaService'
 import type Manga from '@/models/Manga'
 
 export const useLibraryStore = defineStore('library', () => {
@@ -9,13 +9,25 @@ export const useLibraryStore = defineStore('library', () => {
 
     async function fetchLibrary() {
         loading.value = true
-        mangas.value = await list()
+        mangas.value = await mangaService.list()
         loading.value = false
+    }
+
+    async function addToLibrary(manga: Manga) {
+        await mangaService.addToLibrary(manga)
+        fetchLibrary()
+    }
+
+    async function removeFromLibrary(manga: Manga) {
+        await mangaService.removeFromLibrary(manga)
+        fetchLibrary()
     }
 
     return {
         mangas,
         loading,
         fetchLibrary,
+        addToLibrary,
+        removeFromLibrary
     }
 })

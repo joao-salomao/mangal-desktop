@@ -5,6 +5,7 @@ import Settings from '@/components/Settings.vue'
 import Library from '@/components/Library.vue'
 import Search from '@/components/Search.vue'
 import Toast from 'primevue/toast'
+import ConfirmDialog from 'primevue/confirmdialog'
 </script>
 
 <template>
@@ -45,5 +46,6 @@ import Toast from 'primevue/toast'
     </TabView>
 
     <Toast/>
+    <ConfirmDialog/>
 </main>
 </template>

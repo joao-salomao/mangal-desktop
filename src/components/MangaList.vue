@@ -27,15 +27,26 @@
                 </div>
 
                 <div class="actions">
-                    <Button v-if="allowDownload" size="small" label="Download"
-                            v-tooltip="!item.chaptersCount ? 'There are no chapters available for download' : null"
-                            @click="openDownloadDialog(item)"/>
+                    <span v-tooltip="!item.chaptersCount ? 'There are no chapters available for download' : null">
+                        <Button v-if="allowDownload" size="small" label="Download"
+                                icon="pi pi-download"
+                                :disabled="!item.chaptersCount"
+                                @click="openDownloadDialog(item)"/>
+                    </span>
 
-                    <Button v-if="allowAddToLibrary" size="small" label="Add to Library"
-                            @click="addToLibraryHandler(item)"/>
+                    <span
+                        v-tooltip="mangasAddedToLibraryBySourceAndTitle[item.source]?.[item.title] ? 'This manga is already in your library' : null">
+                        <Button v-if="allowAddToLibrary" size="small" label="Add to Library"
+                                :disabled="mangasAddedToLibraryBySourceAndTitle[item.source]?.[item.title]"
+                                @click="addToLibraryHandler(item)"/>
+                    </span>
 
                     <Button v-if="item.anilist?.siteUrl" size="small" label="AniList page"
+                            icon="pi pi-external-link"
                             @click="openAnilistPage(item)"/>
+
+                    <Button v-if="item.id" size="small" label="Remove from Library" icon="pi pi-trash"
+                            severity="danger" @click="removeFromLibraryHandler(item)"/>
                 </div>
             </div>
         </div>
@@ -45,15 +56,16 @@
 </div>
 </template>
 <script setup lang="ts">
-import type {PropType} from 'vue'
+import {computed, PropType} from 'vue'
 import type DownloadedChapter from '@/models/DownloadedChapter'
 import type Manga from '@/models/Manga'
 import {ref} from 'vue'
 import Button from 'primevue/button'
-import {addToLibrary} from '@/services/mangaService'
 import {openFileWithOSDefaultHandler} from '@/services/fileService'
 import DownloadMangaChaptersDialog from '@/components/DownloadMangaChaptersDialog.vue'
 import {useToast} from 'primevue/usetoast'
+import {useLibraryStore} from '@/composables/useLibraryStore.ts'
+import {useConfirm} from 'primevue/useconfirm'
 
 defineProps({
     mangas: {
@@ -71,9 +83,26 @@ defineProps({
 })
 
 const toast = useToast()
+const confirm = useConfirm()
+const libraryStore = useLibraryStore()
 
 const showDownloadDialog = ref(false)
 const selectedManga = ref<Manga | null>(null)
+
+const mangasAddedToLibraryBySourceAndTitle = computed<Record<string, Record<string, boolean>>>(() => {
+    const mangas = libraryStore.mangas
+    const result: Record<string, Record<string, boolean>> = {}
+
+    for (const manga of mangas) {
+        if (!result[manga.source]) {
+            result[manga.source] = {}
+        }
+
+        result[manga.source][manga.title] = true
+    }
+
+    return result
+})
 
 function openAnilistPage(manga: Manga) {
     const element = document.createElement('a')
@@ -89,7 +118,7 @@ function openAnilistPage(manga: Manga) {
 
 async function addToLibraryHandler(manga: Manga) {
     try {
-        await addToLibrary(manga)
+        await libraryStore.addToLibrary(manga)
         toast.add({
             severity: 'success',
             summary: 'Success',
@@ -104,6 +133,22 @@ async function addToLibraryHandler(manga: Manga) {
             life: 5000
         })
     }
+}
+
+function removeFromLibraryHandler(manga: Manga) {
+    confirm.require({
+        header: 'Remove from library',
+        message: `Are you sure you want to remove ${manga.title} from your library?`,
+        accept: async () => {
+            await libraryStore.removeFromLibrary(manga)
+            toast.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: `Manga ${manga.title} removed from your library`,
+                life: 4000
+            })
+        }
+    })
 }
 
 function openDownloadedChapterFile(chapter: DownloadedChapter) {
@@ -122,7 +167,7 @@ function openDownloadDialog(manga: Manga) {
 <style scoped>
 .manga-list-container {
     display: grid;
-    grid-template-columns: auto auto;
+    grid-template-columns: auto;
 
     .manga-container {
         padding: 20px;
@@ -132,8 +177,8 @@ function openDownloadDialog(manga: Manga) {
             gap: 20px;
 
             .cover-image {
-                width: 100%;
-                height: 100%;
+                width: 230px;
+                height: 363px;
                 border-radius: 10px;
                 box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
             }
@@ -171,5 +216,4 @@ function openDownloadDialog(manga: Manga) {
         }
     }
 }
-
 </style>

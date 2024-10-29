@@ -100,3 +100,12 @@ export async function addToLibrary(manga: Manga): Promise<number> {
 
     return result.lastInsertId
 }
+
+export async function removeFromLibrary(manga: Manga): Promise<void> {
+    if (!manga.id) {
+        throw new MangaNotInLibraryError()
+    }
+
+    await db.execute('DELETE FROM downloaded_chapters WHERE mangaId = $1', [manga.id])
+    await db.execute('DELETE FROM mangas WHERE id = $1', [manga.id])
+}
