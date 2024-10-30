@@ -53,6 +53,7 @@
     </div>
 
     <DownloadMangaChaptersDialog v-model:visible="showDownloadDialog" :manga="selectedManga"/>
+    <ChapterReader v-if="showChapterReader" v-model:visible="showChapterReader" :chapter-path="selectedChapter!.path"/>
 </div>
 </template>
 <script setup lang="ts">
@@ -61,11 +62,12 @@ import type DownloadedChapter from '@/models/DownloadedChapter'
 import type Manga from '@/models/Manga'
 import {ref} from 'vue'
 import Button from 'primevue/button'
-import {openFileWithOSDefaultHandler} from '@/services/fileService'
+// import {openFileWithOSDefaultHandler} from '@/services/fileService'
 import DownloadMangaChaptersDialog from '@/components/DownloadMangaChaptersDialog.vue'
 import {useToast} from 'primevue/usetoast'
-import {useLibraryStore} from '@/composables/useLibraryStore.ts'
+import {useLibraryStore} from '@/composables/useLibraryStore'
 import {useConfirm} from 'primevue/useconfirm'
+import ChapterReader from '@/components/ChapterReader.vue'
 
 defineProps({
     mangas: {
@@ -88,6 +90,9 @@ const libraryStore = useLibraryStore()
 
 const showDownloadDialog = ref(false)
 const selectedManga = ref<Manga | null>(null)
+
+const showChapterReader = ref(false)
+const selectedChapter = ref<DownloadedChapter | null>(null)
 
 const mangasAddedToLibraryBySourceAndTitle = computed<Record<string, Record<string, boolean>>>(() => {
     const mangas = libraryStore.mangas
@@ -152,7 +157,9 @@ function removeFromLibraryHandler(manga: Manga) {
 }
 
 function openDownloadedChapterFile(chapter: DownloadedChapter) {
-    openFileWithOSDefaultHandler(chapter.path)
+    showChapterReader.value = true
+    selectedChapter.value = chapter
+    // openFileWithOSDefaultHandler(chapter.path)
 }
 
 function openDownloadDialog(manga: Manga) {

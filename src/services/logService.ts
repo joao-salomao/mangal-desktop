@@ -1,6 +1,6 @@
 import * as logger from '@tauri-apps/plugin-log'
 
-type ContentType = Array<string | number | object>
+type ContentType = Array<string | number | object | boolean>
 
 export async function info(...content: ContentType): Promise<void> {
     await logger.info(formatMessage(...content))
@@ -20,6 +20,6 @@ function formatMessage(...content: ContentType): string {
             return JSON.stringify(part)
         }
 
-        return part
+        return part.toString()
     }).join(' ')
 }

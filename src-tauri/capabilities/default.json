@@ -36,7 +36,9 @@
           "cmd": "xdg-open",
           "args": true,
           "sidecar": false,
-          "platforms": ["linux"]
+          "platforms": [
+            "linux"
+          ]
         }
       ]
     },
@@ -48,7 +50,9 @@
           "cmd": "open",
           "args": true,
           "sidecar": false,
-          "platforms": ["macos"]
+          "platforms": [
+            "macos"
+          ]
         }
       ]
     },
@@ -60,9 +64,15 @@
           "cmd": "start",
           "args": true,
           "sidecar": false,
-          "platforms": ["windows"]
+          "platforms": [
+            "windows"
+          ]
         }
       ]
+    },
+    {
+      "identifier": "fs:scope",
+      "allow": [{ "path": "$HOME" }, { "path": "$HOME/**" }]
     },
     "shell:allow-kill",
     "shell:allow-open",
@@ -71,6 +81,7 @@
     "store:default",
     "sql:default",
     "sql:allow-execute",
-    "os:default"
+    "os:default",
+    "fs:default"
   ]
 }
