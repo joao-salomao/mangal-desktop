@@ -30,7 +30,7 @@ import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
 import {useVModel} from '@vueuse/core'
 import type Manga from '@/models/Manga'
-import {ref} from 'vue'
+import {ref, watch} from 'vue'
 import * as mangaService from '@/services/mangaService'
 import {DownloadFolderNotSetError} from '@/errors'
 import {useToast} from 'primevue/usetoast'
@@ -50,6 +50,12 @@ const visibleModel = useVModel(props, 'visible', emit)
 const chaptersToDownload = ref<Record<number, boolean>>({})
 const isDownloading = ref(false)
 const downloadProgress = ref(0)
+
+watch(visibleModel, (newValue) => {
+    if (newValue) {
+        chaptersToDownload.value = {}
+    }
+})
 
 function selectAllChapters() {
     for (let i = 1; i <= props.manga!.chaptersCount; i++) {
@@ -112,11 +118,11 @@ async function downloadSelectedChapters() {
 
     .download-chapters-list {
         display: flex;
-        gap: 10px;
-        max-height: 400px;
         flex-wrap: wrap;
         align-items: center;
-        justify-content: space-between;
+        justify-content: start;
+        gap: 10px;
+        max-height: 400px;
 
         .chapter {
             display: flex;
