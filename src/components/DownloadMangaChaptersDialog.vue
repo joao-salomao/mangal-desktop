@@ -19,7 +19,8 @@
     <template #footer>
         <Button class="download-button"
                 :label="isDownloading ? `Download (${downloadProgress}%)` : 'Download'"
-                :disabled="isDownloading" :loading="isDownloading"
+                :disabled="isDownloading || !hasSelectedChapters"
+                :loading="isDownloading"
                 @click="downloadSelectedChapters"/>
     </template>
 </Dialog>
@@ -30,7 +31,7 @@ import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
 import {useVModel} from '@vueuse/core'
 import type Manga from '@/models/Manga'
-import {ref, watch} from 'vue'
+import {computed, ref, watch} from 'vue'
 import * as mangaService from '@/services/mangaService'
 import {DownloadFolderNotSetError} from '@/errors'
 import {useToast} from 'primevue/usetoast'
@@ -50,6 +51,8 @@ const visibleModel = useVModel(props, 'visible', emit)
 const chaptersToDownload = ref<Record<number, boolean>>({})
 const isDownloading = ref(false)
 const downloadProgress = ref(0)
+
+const hasSelectedChapters = computed(() => Object.values(chaptersToDownload.value).some(selected => selected))
 
 watch(visibleModel, (newValue) => {
     if (newValue) {
@@ -80,6 +83,13 @@ async function downloadSelectedChapters() {
             await mangaService.download(props.manga!, chapter)
             downloadProgress.value = Math.round((index + 1) / chapters.length * 100)
         }
+
+        toast.add({
+            severity: 'success',
+            summary: 'Download finished',
+            detail: `Downloaded ${chapters.length} chapters`,
+            life: 5_000
+        })
     } catch (e: any) {
         if (e instanceof DownloadFolderNotSetError) {
             toast.add({
@@ -100,12 +110,6 @@ async function downloadSelectedChapters() {
         isDownloading.value = false
         downloadProgress.value = 0
         libraryStore.fetchLibrary()
-        toast.add({
-            severity: 'success',
-            summary: 'Download finished',
-            detail: `Downloaded ${chapters.length} chapters`,
-            life: 5_000
-        })
     }
 }
 </script>
