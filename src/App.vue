@@ -18,7 +18,7 @@ import AppHeader from '@/components/AppHeader.vue'
 </template>
 <style scoped>
 main {
-    margin-top: 60px;
+    margin-top: 80px;
     flex: 1 1 auto;
 }
 </style>
