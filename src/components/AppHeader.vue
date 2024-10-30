@@ -11,11 +11,17 @@
                 <span :class="item.icon"/>
                 <span class="ml-2">{{ item.label }}</span>
             </router-link>
+
             <a v-else v-ripple :href="item.url" :target="item.target" v-bind="props.action">
                 <span :class="item.icon"/>
                 <span class="ml-2">{{ item.label }}</span>
                 <span v-if="hasSubmenu" class="pi pi-fw pi-angle-down ml-2"/>
             </a>
+        </template>
+
+        <template #end>
+            <a class="pi pi-github" target="_blank" href="https://github.com/joao-salomao/mangal-desktop"
+               style="text-decoration: none"/>
         </template>
     </Menubar>
 </div>
