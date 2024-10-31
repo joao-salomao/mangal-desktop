@@ -1,6 +1,5 @@
-import {createStore} from '@tauri-apps/plugin-store'
 import * as logger from '@tauri-apps/plugin-log'
-import type {Store} from '@tauri-apps/plugin-store'
+import {Store} from '@tauri-apps/plugin-store'
 
 // TODO: check if this is the correct way to use the store or if we should always call
 let store: Store | null = null
@@ -8,7 +7,8 @@ let store: Store | null = null
 export async function get<T>(key: string): Promise<T | null> {
     logger.info(`KeyValueDatabase: Get value for key "${key}"`)
     const store = await getStore()
-    return store.get<T>(key)
+    const value = await store.get<T | null | undefined>(key)
+    return value ?? null
 }
 
 
@@ -20,8 +20,8 @@ export async function set<T>(key: string, value: T): Promise<void> {
 
 async function getStore(): Promise<Store> {
     if (!store) {
-        store = await createStore('store.bin', {
-            autoSave: 1 as unknown as boolean,
+        store = await Store.load('store.json', {
+            autoSave: true,
         })
     }
 
