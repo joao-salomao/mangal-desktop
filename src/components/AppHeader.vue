@@ -33,8 +33,6 @@ import {ref} from 'vue'
 import {useRouter} from 'vue-router'
 import type {MenubarProps} from 'primevue/menubar'
 
-const router = useRouter()
-
 const items = ref<MenubarProps['model']>([
     {
         label: 'Library',

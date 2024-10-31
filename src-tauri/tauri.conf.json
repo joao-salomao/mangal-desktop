@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2.0.0",
-  "productName": "mangal-desktop",
+  "productName": "Mangal Desktop",
   "version": "0.1.0",
   "identifier": "com.mangal-desktop.app",
   "build": {
@@ -23,7 +23,10 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": [
+      "appimage",
+      "msi"
+    ],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -31,11 +34,15 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "externalBin": ["binaries/mangal-cli"]
+    "externalBin": [
+      "binaries/mangal-cli"
+    ]
   },
   "plugins": {
     "sql": {
-      "preload": ["sqlite:database.bin"]
+      "preload": [
+        "sqlite:database.bin"
+      ]
     }
   }
 }
