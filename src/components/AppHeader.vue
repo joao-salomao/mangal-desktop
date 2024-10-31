@@ -30,7 +30,6 @@
 <script setup lang="ts">
 import Menubar from 'primevue/menubar'
 import {ref} from 'vue'
-import {useRouter} from 'vue-router'
 import type {MenubarProps} from 'primevue/menubar'
 
 const items = ref<MenubarProps['model']>([
