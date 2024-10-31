@@ -20,22 +20,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: setup node
+      - name: Setup node
         uses: actions/setup-node@v4
         with:
           node-version: 18.12
 
-      - name: install Rust stable
+      - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
-      - name: install dependencies (ubuntu only)
+      - name: Install Ubuntu dependencies
         if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
-      - name: install frontend dependencies
+      - name: Install frontend dependencies
         run: npm install
+
+      - name: Ensure Tauri CLI for Windows
+        if: matrix.platform == 'windows-latest'
+        run: npm install @tauri-apps/cli-win32-x64-msvc
 
       - uses: tauri-apps/tauri-action@v0
         env:
