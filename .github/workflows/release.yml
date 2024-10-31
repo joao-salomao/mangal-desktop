@@ -37,9 +37,9 @@ jobs:
       - name: Install frontend dependencies
         run: npm install
 
-      - name: Ensure Tauri CLI for Windows
-        if: matrix.platform == 'windows-latest'
-        run: npm install @tauri-apps/cli-win32-x64-msvc
+#      - name: Ensure Tauri CLI for Windows
+#        if: matrix.platform == 'windows-latest'
+#        run: npm install @tauri-apps/cli-win32-x64-msvc
 
       - uses: tauri-apps/tauri-action@v0
         env:
