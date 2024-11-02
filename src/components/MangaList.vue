@@ -2,13 +2,14 @@
 <div style="position:relative">
     <div :key="source" v-for="(sourceMangas, source) in mangas" class="source-container">
         <h1 class="source-header">{{ source }}</h1>
-        <ProgressSpinner style="stroke: red"  fill="white"/>
 
-        <Message v-if="!sourceMangas.length && !loading" severity="info" :closable="false">No manga found for this
-            source
+        <ProgressSpinner v-if="loading"/>
+
+        <Message v-else-if="!sourceMangas.length" severity="info" :closable="false">
+            No manga found for this source
         </Message>
 
-        <div v-if="sourceMangas.length && !loading" class="manga-list-container">
+        <div v-else class="manga-list-container">
             <div
                 v-for="(item, index) in sourceMangas"
                 :key="[item.anilist?.id, index].join('-')"
@@ -200,6 +201,9 @@ async function openDownloadDialog(manga: Manga) {
 </script>
 <style scoped>
 .source-container {
+    display: flex;
+    flex-direction: column;
+
     .source-header {
         position: sticky;
         top: 73px;

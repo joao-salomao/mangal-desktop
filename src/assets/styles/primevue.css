@@ -4,3 +4,7 @@
 .p-confirm-dialog {
     max-width: 600px;
 }
+
+.p-progress-spinner-circle {
+    stroke: white !important;
+}
