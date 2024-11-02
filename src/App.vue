@@ -2,6 +2,7 @@
 import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
 import AppHeader from '@/components/AppHeader.vue'
+import ScrollTop from 'primevue/scrolltop'
 </script>
 
 <template>
@@ -12,6 +13,7 @@ import AppHeader from '@/components/AppHeader.vue'
         <RouterView/>
     </main>
 
+    <ScrollTop/>
     <Toast/>
     <ConfirmDialog/>
 </div>
