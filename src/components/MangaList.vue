@@ -3,7 +3,7 @@
     <div :key="source" v-for="(sourceMangas, source) in mangas" class="source-container">
         <h1 class="source-header">{{ source }}</h1>
 
-        <ProgressSpinner v-if="loading"/>
+        <ProgressSpinner v-if="loading && !sourceMangas.length"/>
 
         <Message v-else-if="!sourceMangas.length" severity="info" :closable="false">
             No manga found for this source
