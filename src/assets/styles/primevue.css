@@ -1,0 +1,6 @@
+@import 'primevue/resources/themes/viva-dark/theme.css';
+@import 'primeicons/primeicons.css';
+
+.p-confirm-dialog {
+    max-width: 600px;
+}

@@ -8,8 +8,6 @@ import PrimeVueConfirmationService from 'primevue/confirmationservice'
 import router from '@/router'
 import {createPinia} from 'pinia'
 import '@/assets/styles/index.css'
-import 'primevue/resources/themes/viva-dark/theme.css'
-import 'primeicons/primeicons.css'
 
 const pinia = createPinia()
 
