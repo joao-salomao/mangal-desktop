@@ -1,5 +1,5 @@
 import {get, set} from './keyValueDatabaseService'
-import {open, message} from '@tauri-apps/plugin-dialog'
+import {open} from '@tauri-apps/plugin-dialog'
 
 const DOWNLOAD_FOLDER_KEY: string = 'download_folder'
 
@@ -7,7 +7,6 @@ export async function updateDownloadFolder(): Promise<string | null> {
     const newPath = await open({multiple: false, directory: true})
 
     if (!newPath) {
-        await message(`No folder selected.`, {title: 'Warning', kind: 'warning'})
         return null
     }
 
@@ -18,4 +17,12 @@ export async function updateDownloadFolder(): Promise<string | null> {
 
 export async function getDownloadFolder(): Promise<string | null> {
     return get<string>(DOWNLOAD_FOLDER_KEY)
+}
+
+export async function isDownloadFolderSet(): Promise<boolean> {
+    return (await getDownloadFolder()) !== null
+}
+
+export async function clearStoredDownloadFolder(): Promise<void> {
+    await set(DOWNLOAD_FOLDER_KEY, null)
 }
