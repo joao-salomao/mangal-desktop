@@ -1,32 +1,41 @@
 <template>
-<div class="manga-list-container">
-    <div
-        v-for="(item, index) in mangas"
-        :key="[item.anilist?.id, index].join('-')"
-        class="manga-container"
-    >
-        <div class="manga-details">
-            <img :src="item.metadata.cover.large" :alt="item.title" class="cover-image"/>
+<div style="position:relative">
+    <div :key="source" v-for="(sourceMangas, source) in mangas" class="source-container">
+        <h1 class="source-header">{{ source }}</h1>
+        <ProgressSpinner style="stroke: red"  fill="white"/>
 
-            <div class="info">
-                <p class="name">{{ item.title }}</p>
-                <p class="summary">{{ item.metadata.summary }}</p>
+        <Message v-if="!sourceMangas.length && !loading" severity="info" :closable="false">No manga found for this
+            source
+        </Message>
 
-                <div v-if="item.downloadedChapters?.length" class="downloaded-chapters">
-                    <p>Downloaded chapters</p>
-                    <div>
-                        <Button
-                            v-for="chapter in item.downloadedChapters"
-                            :key="chapter.id"
-                            size="small"
-                            :label="chapter.chapter.toString()"
-                            v-tooltip.top="`Open chapter ${chapter.chapter}: ${chapter.path}`"
-                            @click="openDownloadedChapterFile(chapter)"
-                        />
-                    </div>
-                </div>
+        <div v-if="sourceMangas.length && !loading" class="manga-list-container">
+            <div
+                v-for="(item, index) in sourceMangas"
+                :key="[item.anilist?.id, index].join('-')"
+                class="manga-container"
+            >
+                <div class="manga-details">
+                    <img :src="item.metadata.cover.large" :alt="item.title" class="cover-image"/>
 
-                <div class="actions">
+                    <div class="info">
+                        <p class="name">{{ item.title }}</p>
+                        <p class="summary">{{ item.metadata.summary }}</p>
+
+                        <div v-if="item.downloadedChapters?.length" class="downloaded-chapters">
+                            <p>Downloaded chapters</p>
+                            <div>
+                                <Button
+                                    v-for="chapter in item.downloadedChapters"
+                                    :key="chapter.id"
+                                    size="small"
+                                    :label="chapter.chapter.toString()"
+                                    v-tooltip.top="`Open chapter ${chapter.chapter}: ${chapter.path}`"
+                                    @click="openDownloadedChapterFile(chapter)"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="actions">
                     <span v-tooltip="!item.chaptersCount ? 'There are no chapters available for download' : null">
                         <Button v-if="allowDownload" size="small" label="Download"
                                 icon="pi pi-download"
@@ -34,46 +43,53 @@
                                 @click="openDownloadDialog(item)"/>
                     </span>
 
-                    <span
-                        v-tooltip="mangasAddedToLibraryBySourceAndTitle[item.source]?.[item.title] ? 'This manga is already in your library' : null">
+                            <span
+                                v-tooltip="mangasAddedToLibraryBySourceAndTitle[item.source]?.[item.title] ? 'This manga is already in your library' : null">
                         <Button v-if="allowAddToLibrary" size="small" label="Add to Library"
                                 :disabled="mangasAddedToLibraryBySourceAndTitle[item.source]?.[item.title]"
                                 @click="addToLibraryHandler(item)"/>
                     </span>
 
-                    <Button v-if="item.anilist?.siteUrl" size="small" label="AniList page"
-                            icon="pi pi-external-link"
-                            @click="openAnilistPage(item)"/>
+                            <Button v-if="item.anilist?.siteUrl" size="small" label="AniList page"
+                                    icon="pi pi-external-link"
+                                    @click="openAnilistPage(item)"/>
 
-                    <Button v-if="item.id" size="small" label="Remove from Library" icon="pi pi-trash"
-                            severity="danger" @click="removeFromLibraryHandler(item)"/>
+                            <Button v-if="item.id" size="small" label="Remove from Library" icon="pi pi-trash"
+                                    severity="danger" @click="removeFromLibraryHandler(item)"/>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <DownloadMangaChaptersDialog v-model:visible="showDownloadDialog" :manga="selectedManga"/>
+            <ChapterReader v-if="showChapterReader" v-model:visible="showChapterReader"
+                           :chapter-path="selectedChapter!.path"/>
         </div>
     </div>
-
-    <DownloadMangaChaptersDialog v-model:visible="showDownloadDialog" :manga="selectedManga"/>
-    <ChapterReader v-if="showChapterReader" v-model:visible="showChapterReader" :chapter-path="selectedChapter!.path"/>
 </div>
 </template>
 <script setup lang="ts">
 import type DownloadedChapter from '@/models/DownloadedChapter'
 import type Manga from '@/models/Manga'
-import {computed, PropType} from 'vue'
-import {ref} from 'vue'
-import Button from 'primevue/button'
-import DownloadMangaChaptersDialog from '@/components/DownloadMangaChaptersDialog.vue'
+import {defineAsyncComponent, PropType} from 'vue'
+import {ref, computed} from 'vue'
 import {useToast} from 'primevue/usetoast'
 import {useLibraryStore} from '@/composables/useLibraryStore'
 import {useConfirm} from 'primevue/useconfirm'
-import ChapterReader from '@/components/ChapterReader.vue'
 import router from '@/router.ts'
 import {isDownloadFolderSet} from '@/services/settingsService'
 
+const ChapterReader = () => defineAsyncComponent(() => import('@/components/ChapterReader.vue'))
+const DownloadMangaChaptersDialog = () => defineAsyncComponent(() => import('@/components/DownloadMangaChaptersDialog.vue'))
+
 defineProps({
     mangas: {
-        type: Array as PropType<Manga[]>,
+        type: Object as PropType<Record<string, Manga[]>>,
         required: true
+    },
+    loading: {
+        type: Boolean,
+        default: false
     },
     allowAddToLibrary: {
         type: Boolean,
@@ -99,12 +115,14 @@ const mangasAddedToLibraryBySourceAndTitle = computed<Record<string, Record<stri
     const mangas = libraryStore.mangas
     const result: Record<string, Record<string, boolean>> = {}
 
-    for (const manga of mangas) {
-        if (!result[manga.source]) {
-            result[manga.source] = {}
+    for (const source in mangas) {
+        if (!result[source]) {
+            result[source] = {}
         }
 
-        result[manga.source][manga.title] = true
+        for (const manga of mangas[source]) {
+            result[source][manga.title] = true
+        }
     }
 
     return result
@@ -181,52 +199,64 @@ async function openDownloadDialog(manga: Manga) {
 }
 </script>
 <style scoped>
-.manga-list-container {
-    display: grid;
-    grid-template-columns: auto;
+.source-container {
+    .source-header {
+        position: sticky;
+        top: 73px;
+        padding: 10px 0;
+        font-size: 1.3rem;
+        z-index: 2;
+        background-color: var(--gray-700)
+    }
 
-    .manga-container {
-        padding: 20px;
+    .manga-list-container {
+        display: grid;
+        grid-template-columns: auto;
+        height: 100%;
 
-        .manga-details {
-            display: flex;
-            gap: 20px;
+        .manga-container {
+            padding: 20px;
 
-            .cover-image {
-                width: 230px;
-                height: 363px;
-                border-radius: 10px;
-                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            }
+            .manga-details {
+                display: flex;
+                gap: 20px;
 
-            .info {
-                .name {
-                    font-size: 1.5rem;
-                    margin-bottom: 10px;
+                .cover-image {
+                    width: 230px;
+                    height: 363px;
+                    border-radius: 10px;
+                    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
                 }
 
-                .summary {
-                    margin-bottom: 20px;
-                }
-
-                .downloaded-chapters {
-                    margin-bottom: 20px;
-
-                    p {
-                        font-weight: bold;
-                        margin-bottom: 5px;
+                .info {
+                    .name {
+                        font-size: 1.5rem;
+                        margin-bottom: 10px;
                     }
 
-                    div {
+                    .summary {
+                        margin-bottom: 20px;
+                    }
+
+                    .downloaded-chapters {
+                        margin-bottom: 20px;
+
+                        p {
+                            font-weight: bold;
+                            margin-bottom: 5px;
+                        }
+
+                        div {
+                            display: flex;
+                            flex-wrap: wrap;
+                            gap: 5px;
+                        }
+                    }
+
+                    .actions {
                         display: flex;
-                        flex-wrap: wrap;
-                        gap: 5px;
+                        gap: 10px;
                     }
-                }
-
-                .actions {
-                    display: flex;
-                    gap: 10px;
                 }
             }
         }
