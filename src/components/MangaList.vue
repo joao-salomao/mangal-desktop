@@ -62,7 +62,9 @@
                 </div>
             </div>
 
-            <DownloadMangaChaptersDialog v-model:visible="showDownloadDialog" :manga="selectedManga"/>
+            <DownloadMangaChaptersDialog v-if="allowDownload" v-model:visible="showDownloadDialog"
+                                         :manga="selectedManga"/>
+
             <ChapterReader v-if="showChapterReader" v-model:visible="showChapterReader"
                            :chapter-path="selectedChapter!.path"/>
         </div>
@@ -77,11 +79,11 @@ import {ref, computed} from 'vue'
 import {useToast} from 'primevue/usetoast'
 import {useLibraryStore} from '@/composables/useLibraryStore'
 import {useConfirm} from 'primevue/useconfirm'
-import router from '@/router.ts'
 import {isDownloadFolderSet} from '@/services/settingsService'
+import {useRouter} from 'vue-router'
 
-const ChapterReader = () => defineAsyncComponent(() => import('@/components/ChapterReader.vue'))
-const DownloadMangaChaptersDialog = () => defineAsyncComponent(() => import('@/components/DownloadMangaChaptersDialog.vue'))
+const ChapterReader = defineAsyncComponent(() => import('@/components/ChapterReader.vue'))
+const DownloadMangaChaptersDialog = defineAsyncComponent(() => import('@/components/DownloadMangaChaptersDialog.vue'))
 
 defineProps({
     mangas: {
@@ -105,6 +107,7 @@ defineProps({
 const toast = useToast()
 const confirm = useConfirm()
 const libraryStore = useLibraryStore()
+const router = useRouter()
 
 const showDownloadDialog = ref(false)
 const selectedManga = ref<Manga | null>(null)
