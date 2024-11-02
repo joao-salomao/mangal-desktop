@@ -20,7 +20,7 @@ export function pluck<T, K extends keyof T>(array: T[], key: K): T[K][] {
  * It returns a new hash map with the values of the specified key from the original array as keys.
  * Example: groupBy([{id: 1, name: 'John'}, {id: 2, name: 'Jane'}], 'id') => {1: {id: 1, name: 'John'}, 2: {id: 2, name: 'Jane'}}
  */
-export function groupBy<T, K extends keyof T>(array: T[], key: K): Record<T[K], T[]> {
+export function groupBy<T extends Record<string, any>, K extends keyof T>(array: T[], key: K): Record<T[K], T[]> {
     return array.reduce((acc, item) => {
         const group = item[key]
         if (!acc[group]) {
