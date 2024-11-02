@@ -57,17 +57,18 @@
 </div>
 </template>
 <script setup lang="ts">
-import {computed, PropType} from 'vue'
 import type DownloadedChapter from '@/models/DownloadedChapter'
 import type Manga from '@/models/Manga'
+import {computed, PropType} from 'vue'
 import {ref} from 'vue'
 import Button from 'primevue/button'
-// import {openFileWithOSDefaultHandler} from '@/services/fileService'
 import DownloadMangaChaptersDialog from '@/components/DownloadMangaChaptersDialog.vue'
 import {useToast} from 'primevue/usetoast'
 import {useLibraryStore} from '@/composables/useLibraryStore'
 import {useConfirm} from 'primevue/useconfirm'
 import ChapterReader from '@/components/ChapterReader.vue'
+import router from '@/router.ts'
+import {isDownloadFolderSet} from '@/services/settingsService'
 
 defineProps({
     mangas: {
@@ -159,12 +160,20 @@ function removeFromLibraryHandler(manga: Manga) {
 function openDownloadedChapterFile(chapter: DownloadedChapter) {
     showChapterReader.value = true
     selectedChapter.value = chapter
-    // openFileWithOSDefaultHandler(chapter.path)
 }
 
-function openDownloadDialog(manga: Manga) {
+async function openDownloadDialog(manga: Manga) {
     if (!manga.chaptersCount) {
         return
+    }
+
+    const isFolderSet = await isDownloadFolderSet()
+    if (!isFolderSet) {
+        return confirm.require({
+            header: 'Download folder not set',
+            message: 'You need to set the download folder in the settings before downloading chapters. Do you want to go to the settings page now?',
+            accept: () => router.push({name: 'settings'}),
+        })
     }
 
     selectedManga.value = manga
