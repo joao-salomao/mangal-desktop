@@ -22,7 +22,6 @@ import * as logger from '@/services/logService'
 import {useFullscreen} from '@vueuse/core'
 import {onKeyStroke} from '@vueuse/core'
 
-
 const props = defineProps<{
     visible: boolean,
     chapterPath: string
@@ -82,10 +81,6 @@ onKeyStroke('ArrowDown', () => {
 
 onKeyStroke('Escape', () => {
     fullscreen.exit()
-})
-
-onKeyStroke('MouseWheel', (e) => {
-    console.log(e, 'MouseWheel')
 })
 </script>
 <style scoped>

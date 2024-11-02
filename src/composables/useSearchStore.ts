@@ -42,8 +42,6 @@ export const useSearchStore = defineStore('search', () => {
             })
 
             await Promise.allSettled(promises)
-
-            console.log(mangas.value)
         } catch (e: any) {
             await logger.error('Error while searching' + e)
         } finally {
