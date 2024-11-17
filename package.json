@@ -8,7 +8,8 @@
     "tsc": "vue-tsc",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "prepare": "husky"
   },
   "dependencies": {
     "@tato30/vue-pdf": "^1.11.2",
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.5",
+    "husky": "^9.1.6",
     "typescript": "^5.2.2",
     "unplugin-vue-components": "^0.27.4",
     "vite": "^5.3.1",
