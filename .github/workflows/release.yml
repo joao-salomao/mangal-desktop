@@ -5,6 +5,10 @@ on:
     branches:
       - release
 
+env:
+  # Disable the Husky hooks
+  HUSKY: 0
+
 jobs:
   release:
     permissions:

@@ -1,0 +1,2 @@
+npm run tsc
+cd src-tauri && cargo check
