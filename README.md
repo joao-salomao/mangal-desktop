@@ -8,7 +8,7 @@ It allows users to search for manga across multiple sources such
 as [MangaDex](https://mangadex.org/), [Mangapill](https://mangapill.com/), and [Manganato](https://manganato.com/);
 download manga chapters; and read them offline through a simple and intuitive interface.
 
-[<img src="https://raw.githubusercontent.com/joao-salomao/mangal-desktop/refs/heads/master/art/library.png">](Mangal Desktop Library)
+<img src="https://raw.githubusercontent.com/joao-salomao/mangal-desktop/refs/heads/master/art/library.png">
 
 ## Credits
 
