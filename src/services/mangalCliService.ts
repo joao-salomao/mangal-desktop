@@ -8,27 +8,33 @@ export async function download(title: string, source: string, chapterIndex: numb
 }
 
 export async function search(search: string, source: string): Promise<QueryResult> {
-    await logger.info('MangalCliService| Searching for manga: ' + search + ' on ' + source)
-
     const args = ['inline', '--fetch-metadata', '--include-anilist-manga', '--source', source, '--query', search, '-j']
     const output = await runCommand(args)
-
     return JSON.parse(output) as unknown as QueryResult
 }
 
-async function runCommand(args: string | string[], options: SpawnOptions = {}): Promise<string> {
+export async function getChaptersAvailableToDownload(title: string, source: string): Promise<number> {
+    const args = ['inline', '--source', source, '--manga', 'exact', '--query', title, '--chapters', 'all', '-j']
+    const output = await runCommand(args)
+    const queryResult = JSON.parse(output) as unknown as QueryResult
+    return queryResult.result[0]?.mangal?.chapters?.length ?? 0
+}
+
+async function runCommand(args: string[], options: SpawnOptions = {}): Promise<string> {
     const command = Command.sidecar('binaries/mangal-cli', args, options)
     await command.spawn()
 
     return new Promise((resolve, reject) => {
+        const argsToLog = 'mangal-cli ' + (Array.isArray(args) ? args.join(' ') : args)
+
         command.stdout.on('data', (data) => {
-            logger.info('Command successfully executed:', args, data)
+            logger.info('Command successfully executed:', argsToLog, data)
             resolve(data)
         })
 
         command.stderr.on('data', (data) => {
-            logger.error('Error while executing command:', args, data)
-            reject(data)
+            logger.error('Error while executing command:', argsToLog, data)
+            reject(new Error(data))
         })
     })
 }
@@ -72,7 +78,7 @@ export interface MangaSource {
     url: string;
     index: number;
     id: string;
-    chapters: any[];
+    chapters?: any[];
     metadata: MangaMetadata;
 }
 
@@ -145,7 +151,7 @@ export interface AniList {
 export interface Result {
     source: string;
     mangal: MangaSource;
-    anilist: AniList;
+    anilist?: AniList;
 }
 
 export interface QueryResult {

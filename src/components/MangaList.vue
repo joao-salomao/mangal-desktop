@@ -37,10 +37,10 @@
                         </div>
 
                         <div class="actions">
-                    <span v-tooltip="!item.chaptersCount ? 'There are no chapters available for download' : null">
+                    <span v-tooltip="!item.chaptersAvailableToDownload ? 'There are no chapters available for download' : null">
                         <Button v-if="allowDownload" size="small" label="Download"
                                 icon="pi pi-download"
-                                :disabled="!item.chaptersCount"
+                                :disabled="!item.chaptersAvailableToDownload"
                                 @click="openDownloadDialog(item)"/>
                     </span>
 
@@ -185,7 +185,7 @@ function openDownloadedChapterFile(chapter: DownloadedChapter) {
 }
 
 async function openDownloadDialog(manga: Manga) {
-    if (!manga.chaptersCount) {
+    if (!manga.chaptersAvailableToDownload) {
         return
     }
 

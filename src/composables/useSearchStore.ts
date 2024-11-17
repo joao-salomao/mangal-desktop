@@ -36,7 +36,7 @@ export const useSearchStore = defineStore('search', () => {
                         toast.add({
                             severity: 'error',
                             summary: 'Error',
-                            detail: `Something went wrong while searching for "${form.value.search}" on "${source}"`
+                            detail: `Something went wrong while searching for "${form.value.search}" on "${source}": ${e.toString()}`
                         })
                     })
             })

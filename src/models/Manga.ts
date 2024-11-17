@@ -1,12 +1,4 @@
-import type {
-    Result,
-    AniListCharacter,
-    AniListCoverImage,
-    AniListStaff,
-    AniListStartDate,
-    AniListTag,
-    AniListTitle
-} from '@/services/mangalCliService'
+import type { Result } from '@/services/mangalCliService'
 import DownloadedChapter from '@/models/DownloadedChapter.ts'
 
 export default class Manga {
@@ -15,6 +7,7 @@ export default class Manga {
     source: string
     createdAt?: string
     updatedAt?: string
+    chaptersAvailableToDownload: number
     metadata: {
         genres: string[]
         summary: string
@@ -50,28 +43,7 @@ export default class Manga {
     }
 
     anilist?: {
-        title: AniListTitle;
-        id: number;
-        description: string;
-        coverImage: AniListCoverImage;
-        bannerImage: string;
-        tags: AniListTag[];
-        genres: string[];
-        characters: {
-            nodes: AniListCharacter[];
-        };
-        staff: {
-            edges: AniListStaff[];
-        };
-        startDate: AniListStartDate;
-        endDate: AniListStartDate;
-        synonyms: string[];
-        status: string;
-        idMal: number;
-        chapters: number;
         siteUrl: string;
-        countryOfOrigin: string;
-        externalLinks: string[];
     }
 
     downloadedChapters?: Array<DownloadedChapter>
@@ -84,6 +56,7 @@ export default class Manga {
         anilist?: Manga['anilist'],
         createdAt?: string,
         updatedAt?: string,
+        chaptersAvailableToDownload?: number
     }) {
         this.id = params?.id
         this.title = params.title
@@ -92,6 +65,7 @@ export default class Manga {
         this.anilist = params.anilist
         this.createdAt = params.createdAt
         this.updatedAt = params.updatedAt
+        this.chaptersAvailableToDownload = params.chaptersAvailableToDownload ?? 0
     }
 
     public static fromDatabaseRow(row: { [key: string]: any }): Manga {
@@ -103,6 +77,7 @@ export default class Manga {
             anilist: row.anilist ? JSON.parse(row.anilist) : undefined,
             createdAt: row.createdAt,
             updatedAt: row.updatedAt,
+            chaptersAvailableToDownload: row.chaptersAvailableToDownload
         })
     }
 
@@ -110,12 +85,9 @@ export default class Manga {
         return new Manga({
             title: result.mangal.name,
             source: result.source,
-            anilist: result.anilist,
-            metadata: result.mangal.metadata
+            anilist: {siteUrl: result.anilist?.siteUrl},
+            metadata: result.mangal.metadata,
+            chaptersAvailableToDownload: result.mangal.chapters?.length ?? 0
         })
-    }
-
-    public get chaptersCount(): number {
-        return this.metadata.chapters ?? this.anilist?.chapters ?? 0
     }
 }

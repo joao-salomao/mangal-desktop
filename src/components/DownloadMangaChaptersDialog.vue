@@ -7,7 +7,7 @@
             <Button label="Unselect all" size="small" @click="unselectAllChapters"/>
             <div
                 :key="chapter"
-                v-for="chapter in props.manga!.chaptersCount"
+                v-for="chapter in props.manga!.chaptersAvailableToDownload"
                 class="chapter"
             >
                 <label :for="`chapter-${chapter}`">{{ chapter }}</label>
@@ -61,13 +61,13 @@ watch(visibleModel, (newValue) => {
 })
 
 function selectAllChapters() {
-    for (let i = 1; i <= props.manga!.chaptersCount; i++) {
+    for (let i = 1; i <= props.manga!.chaptersAvailableToDownload; i++) {
         chaptersToDownload.value[i] = true
     }
 }
 
 function unselectAllChapters() {
-    for (let i = 1; i <= props.manga!.chaptersCount; i++) {
+    for (let i = 1; i <= props.manga!.chaptersAvailableToDownload; i++) {
         chaptersToDownload.value[i] = false
     }
 }

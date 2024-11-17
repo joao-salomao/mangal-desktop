@@ -12,6 +12,7 @@ pub fn run() {
                     source TEXT NOT NULL,
                     metadata TEXT NOT NULL,
                     anilist TEXT DEFAULT NULL,
+                    chaptersAvailableToDownload INTEGER NOT NULL,
                     createdAt TEXT NOT NULL,
                     updatedAt TEXT NOT NULL
                 );

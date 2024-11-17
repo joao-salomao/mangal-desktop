@@ -86,12 +86,18 @@ export async function list(): Promise<Manga[]> {
  * Adds a manga to the library by inserting it into the database
  */
 export async function addToLibrary(manga: Manga): Promise<number> {
+    // We need to specifically ask for this information because the number set on the metadata or the Anilist is not object
+    // is not reliable, they are often set to 0 or null when that's not the case. If we ask for this information when searching
+    // for a manga, we might hit the source rate limit, so we ask for it only when adding to the library to avoid that.
+    const chaptersAvailableToDownload = await mangalCliService.getChaptersAvailableToDownload(manga.title, manga.source)
+
     const result = await db.execute(
-        'INSERT INTO mangas(title, source, metadata, anilist, createdAt, updatedAt) VALUES($1, $2, $3, $4, $5, $6)',
+        'INSERT INTO mangas(title, source, metadata, chaptersAvailableToDownload, anilist, createdAt, updatedAt) VALUES($1, $2, $3, $4, $5, $6, $7)',
         [
             manga.title,
             manga.source,
             JSON.stringify(manga.metadata),
+            chaptersAvailableToDownload,
             manga.anilist ? JSON.stringify(manga.anilist) : null,
             new Date().toISOString(),
             new Date().toISOString()
