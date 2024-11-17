@@ -1,5 +1,6 @@
 <template>
-<Dialog v-model:visible="visibleModel" :modal="true" :header="manga?.title" :closable="!isDownloading"
+<Dialog v-model:visible="visibleModel" :modal="true" :header="`Select the chapters you want to download`" :closable="!isDownloading"
+        :draggable="false"
         content-style="width: 600px">
     <div class="download-chapters-container">
         <div class="download-chapters-list">
