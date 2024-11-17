@@ -43,7 +43,7 @@ export default class Manga {
     }
 
     anilist?: {
-        siteUrl: string;
+        siteUrl?: string;
     }
 
     downloadedChapters?: Array<DownloadedChapter>

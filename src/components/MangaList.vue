@@ -12,7 +12,7 @@
         <div v-else class="manga-list-container">
             <div
                 v-for="(item, index) in sourceMangas"
-                :key="[item.anilist?.id, index].join('-')"
+                :key="[source, item.title, index].join('-')"
                 class="manga-container"
             >
                 <div class="manga-details">
@@ -37,7 +37,8 @@
                         </div>
 
                         <div class="actions">
-                    <span v-tooltip="!item.chaptersAvailableToDownload ? 'There are no chapters available for download' : null">
+                    <span
+                        v-tooltip="!item.chaptersAvailableToDownload ? 'There are no chapters available for download' : null">
                         <Button v-if="allowDownload" size="small" label="Download"
                                 icon="pi pi-download"
                                 :disabled="!item.chaptersAvailableToDownload"
@@ -134,7 +135,7 @@ const mangasAddedToLibraryBySourceAndTitle = computed<Record<string, Record<stri
 
 function openAnilistPage(manga: Manga) {
     const element = document.createElement('a')
-    element.href = manga.anilist!.siteUrl
+    element.href = manga.anilist!.siteUrl!
     element.target = '_blank'
 
     document.body.appendChild(element)
