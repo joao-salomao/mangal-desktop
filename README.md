@@ -12,6 +12,5 @@ download manga chapters; and read them offline through a simple and intuitive in
 
 ## Credits
 
-Kudos to [@metafates](https://github.com/metafates) for creating [Mangal](https://github.com/metafates/mangal) the core
-of this project and the
+Kudos to [@metafates](https://github.com/metafates) for creating [Mangal](https://github.com/metafates/mangal) the core and the
 inspiration to create this project.
