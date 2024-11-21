@@ -37,6 +37,9 @@
     ],
     "externalBin": [
       "binaries/mangal-cli"
+    ],
+    "resources": [
+      "assets"
     ]
   },
   "plugins": {

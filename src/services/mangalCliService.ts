@@ -1,40 +1,74 @@
 import {Command} from '@tauri-apps/plugin-shell'
 import * as logger from '@/services/logService'
+import {resolveResource} from '@tauri-apps/api/path'
 import type {SpawnOptions} from '@tauri-apps/plugin-shell'
 
 export async function download(title: string, source: string, chapterIndex: number, downloadFolder: string): Promise<string> {
-    const args = ['inline', '--source', source, '--query', title, '--manga', 'exact', '--chapters', chapterIndex.toString(), '--format', 'pdf', '--download']
-    return await runCommand(args, {cwd: downloadFolder})
+    return await runCommand({
+        args: ['inline', '--source', source, '--query', title, '--manga', 'exact', '--chapters', chapterIndex.toString(), '--format', 'pdf', '--download'],
+        options: {cwd: downloadFolder}
+    })
 }
 
 export async function search(search: string, source: string): Promise<QueryResult> {
-    const args = ['inline', '--fetch-metadata', '--include-anilist-manga', '--source', source, '--query', search, '-j']
-    const output = await runCommand(args)
+    const output = await runCommand({
+        args: ['inline', '--fetch-metadata', '--include-anilist-manga', '--source', source, '--query', search, '-j']
+    })
     return JSON.parse(output) as unknown as QueryResult
 }
 
 export async function getChaptersAvailableToDownload(title: string, source: string): Promise<number> {
-    const args = ['inline', '--source', source, '--manga', 'exact', '--query', title, '--chapters', 'all', '-j']
-    const output = await runCommand(args)
+    const output = await runCommand({
+        args: ['inline', '--source', source, '--manga', 'exact', '--query', title, '--chapters', 'all', '-j']
+    })
+
     const queryResult = JSON.parse(output) as unknown as QueryResult
     return queryResult.result[0]?.mangal?.chapters?.length ?? 0
 }
 
-async function runCommand(args: string[], options: SpawnOptions = {}): Promise<string> {
-    const command = Command.sidecar('binaries/mangal-cli', args, options)
+export async function getAvailableSources(): Promise<string[]> {
+    const output = await runCommand({
+        args: ['sources', 'list', '-r'],
+        sync: true
+    })
+
+    return output.split('\n').map(s => s.trim()).filter(s => !!s)
+}
+
+async function runCommand(params: {
+    args: string[];
+    options?: SpawnOptions;
+    sync?: boolean;
+}): Promise<string> {
+    const mangalConfigPath = await resolveResource('assets/mangal')
+
+    const command = Command.sidecar('binaries/mangal-cli', params.args, {
+        ...params.options ?? {},
+        env: {MANGAL_CONFIG_PATH: mangalConfigPath}
+    })
+
+    if (params.sync) {
+        const childProcess = await command.execute()
+        return childProcess.stdout
+    }
+
     await command.spawn()
 
     return new Promise((resolve, reject) => {
-        const argsToLog = 'mangal-cli ' + (Array.isArray(args) ? args.join(' ') : args)
+        const argsToLog = 'mangal-cli ' + params.args.join(' ')
 
+        // It resolves the promise when it receives the first data event because the search command outputs the result in a single line
+        // which is the first data event. We could also resolve the promise when the command ends but sometimes the close event is emitted
+        // before the last data event is emitted which causes the promise to resolve with an incomplete result. This was specifically
+        // tested with the sources list command, that's the reason why it is the only command that has the async flag set to true.
         command.stdout.on('data', (data) => {
-            logger.info('Command successfully executed:', argsToLog, data)
+            logger.info('Successfully run command ' + argsToLog, data)
             resolve(data)
         })
 
-        command.stderr.on('data', (data) => {
-            logger.error('Error while executing command:', argsToLog, data)
-            reject(new Error(data))
+        command.on('error', (err) => {
+            logger.error('Error running command ' + argsToLog, err)
+            reject(new Error(err))
         })
     })
 }

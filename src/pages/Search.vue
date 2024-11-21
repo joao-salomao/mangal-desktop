@@ -3,11 +3,13 @@
     <form @submit.prevent="searchStore.search">
         <InputGroup>
             <InputGroupAddon>Source</InputGroupAddon>
-            <MultiSelect v-model="searchStore.form.sources" :options="sourceOptions" style="max-width: 400px"/>
+            <MultiSelect v-model="searchStore.form.sources" :options="searchStore.sources"
+                         :disabled="searchStore.loadingSources"
+                         :loading="searchStore.loadingSources" style="max-width: 400px"/>
             <InputGroupAddon>Name</InputGroupAddon>
             <InputText v-model="searchStore.form.search" style="max-width: 500px"/>
             <Button label="Search" type="submit" :loading="searchStore.loading"
-                    :disabled="searchStore.loading || !searchStore.form.search.length"
+                    :disabled="searchStore.loadingSources || searchStore.loading || !searchStore.form.search.length"
             />
         </InputGroup>
     </form>
@@ -25,8 +27,11 @@ import InputGroup from 'primevue/inputgroup'
 import InputText from 'primevue/inputtext'
 import {useSearchStore} from '@/composables/useSearchStore'
 import MangaList from '@/components/MangaList.vue'
-
-const sourceOptions = ['Mangapill', 'Manganelo', 'Manganato', 'Mangadex']
+import {onMounted} from 'vue'
 
 const searchStore = useSearchStore()
+
+onMounted(() => {
+    searchStore.fetchSources()
+})
 </script>
