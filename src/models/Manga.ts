@@ -48,6 +48,9 @@ export default class Manga {
 
     downloadedChapters?: Array<DownloadedChapter>
 
+    // States for the UI
+    $addingToLibrary?: boolean
+
     public constructor(params: {
         id?: number,
         title: string,

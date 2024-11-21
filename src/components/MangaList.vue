@@ -49,6 +49,7 @@
                                 v-tooltip="mangasAddedToLibraryBySourceAndTitle[item.source]?.[item.title] ? 'This manga is already in your library' : null">
                         <Button v-if="allowAddToLibrary" size="small" label="Add to Library"
                                 :disabled="mangasAddedToLibraryBySourceAndTitle[item.source]?.[item.title]"
+                                :loading="item.$addingToLibrary"
                                 @click="addToLibraryHandler(item)"/>
                     </span>
 
@@ -147,6 +148,7 @@ function openAnilistPage(manga: Manga) {
 
 async function addToLibraryHandler(manga: Manga) {
     try {
+        manga.$addingToLibrary = true
         await libraryStore.addToLibrary(manga)
         toast.add({
             severity: 'success',
@@ -161,6 +163,8 @@ async function addToLibraryHandler(manga: Manga) {
             detail: 'An error occurred while adding the manga to the library: ' + e.toString(),
             life: 5000
         })
+    } finally {
+        manga.$addingToLibrary = false
     }
 }
 
