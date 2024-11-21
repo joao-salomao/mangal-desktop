@@ -4,49 +4,66 @@ import {resolveResource} from '@tauri-apps/api/path'
 import type {SpawnOptions} from '@tauri-apps/plugin-shell'
 
 export async function download(title: string, source: string, chapterIndex: number, downloadFolder: string): Promise<string> {
-    const args = ['inline', '--source', source, '--query', title, '--manga', 'exact', '--chapters', chapterIndex.toString(), '--format', 'pdf', '--download']
-    return await runCommand(args, {cwd: downloadFolder})
+    return await runCommand({
+        args: ['inline', '--source', source, '--query', title, '--manga', 'exact', '--chapters', chapterIndex.toString(), '--format', 'pdf', '--download'],
+        options: {cwd: downloadFolder}
+    })
 }
 
 export async function search(search: string, source: string): Promise<QueryResult> {
-    const args = ['inline', '--fetch-metadata', '--include-anilist-manga', '--source', source, '--query', search, '-j']
-    const output = await runCommand(args)
+    const output = await runCommand({
+        args: ['inline', '--fetch-metadata', '--include-anilist-manga', '--source', source, '--query', search, '-j']
+    })
     return JSON.parse(output) as unknown as QueryResult
 }
 
 export async function getChaptersAvailableToDownload(title: string, source: string): Promise<number> {
-    const args = ['inline', '--source', source, '--manga', 'exact', '--query', title, '--chapters', 'all', '-j']
-    const output = await runCommand(args)
+    const output = await runCommand({
+        args: ['inline', '--source', source, '--manga', 'exact', '--query', title, '--chapters', 'all', '-j']
+    })
+
     const queryResult = JSON.parse(output) as unknown as QueryResult
     return queryResult.result[0]?.mangal?.chapters?.length ?? 0
 }
 
 export async function getAvailableSources(): Promise<string[]> {
-    const output = await runCommand(['sources', 'list', '-r'])
+    const output = await runCommand({
+        args: ['sources', 'list', '-r'],
+        sync: true
+    })
+
     return output.split('\n').map(s => s.trim()).filter(s => !!s)
 }
 
-
-async function runCommand(args: string[], options: SpawnOptions = {}): Promise<string> {
+async function runCommand(params: {
+    args: string[];
+    options?: SpawnOptions;
+    sync?: boolean;
+}): Promise<string> {
     const mangalConfigPath = await resolveResource('assets/mangal')
 
-    const command = Command.sidecar('binaries/mangal-cli', args, {
-        ...options,
+    const command = Command.sidecar('binaries/mangal-cli', params.args, {
+        ...params.options ?? {},
         env: {MANGAL_CONFIG_PATH: mangalConfigPath}
     })
+
+    if (params.sync) {
+        const childProcess = await command.execute()
+        return childProcess.stdout
+    }
 
     await command.spawn()
 
     return new Promise((resolve, reject) => {
-        const argsToLog = 'mangal-cli ' + (Array.isArray(args) ? args.join(' ') : args)
-        const outputs: string[] = []
+        const argsToLog = 'mangal-cli ' + params.args.join(' ')
 
+        // It resolves the promise when it receives the first data event because the search command outputs the result in a single line
+        // which is the first data event. We could also resolve the promise when the command ends but sometimes the close event is emitted
+        // before the last data event is emitted which causes the promise to resolve with an incomplete result. This was specifically
+        // tested with the sources list command, that's the reason why it is the only command that has the async flag set to true.
         command.stdout.on('data', (data) => {
-            outputs.push(data)
-        })
-
-        command.on('close', () => {
-            resolve(outputs.length > 1 ? outputs.join(' ') : outputs[0])
+            logger.info('Successfully run command ' + argsToLog, data)
+            resolve(data)
         })
 
         command.on('error', (err) => {
