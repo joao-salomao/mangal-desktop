@@ -21,6 +21,12 @@ export async function getChaptersAvailableToDownload(title: string, source: stri
     return queryResult.result[0]?.mangal?.chapters?.length ?? 0
 }
 
+export async function getAvailableSources(): Promise<string[]> {
+    const output = await runCommand(['sources', 'list', '-r'])
+    return output.split('\n').map(s => s.trim()).filter(s => !!s)
+}
+
+
 async function runCommand(args: string[], options: SpawnOptions = {}): Promise<string> {
     const mangalConfigPath = await resolveResource('assets/mangal')
 

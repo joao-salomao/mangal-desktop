@@ -1,20 +1,38 @@
 import {ref} from 'vue'
 import {defineStore} from 'pinia'
 import * as mangaService from '@/services/mangaService'
+import {getAvailableSources} from '@/services/mangalCliService'
 import * as logger from '@/services/logService'
 import type Manga from '@/models/Manga'
 import {useToast} from 'primevue/usetoast'
 
 export const useSearchStore = defineStore('search', () => {
     const loading = ref(false)
-    const form = ref({
-        sources: ['Mangapill'],
-        search: ''
-    })
-
+    const loadingSources = ref(false)
+    const form = ref({sources: [], search: ''})
+    const sources = ref<string[]>([])
     const mangas = ref<Record<string, Manga[]>>({})
-
     const toast = useToast()
+
+    async function fetchSources() {
+        try {
+            if (loadingSources.value || sources.value.length > 0) {
+                return
+            }
+
+            loadingSources.value = true
+            sources.value = await getAvailableSources()
+        } catch (e: any) {
+            logger.error('Error while fetching sources: ' + e)
+            toast.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Something went wrong while fetching sources: ' + e.toString()
+            })
+        } finally {
+            loadingSources.value = false
+        }
+    }
 
     async function search() {
         try {
@@ -51,8 +69,11 @@ export const useSearchStore = defineStore('search', () => {
 
     return {
         loading,
+        loadingSources,
         form,
         mangas,
-        search
+        sources,
+        search,
+        fetchSources
     }
 })
