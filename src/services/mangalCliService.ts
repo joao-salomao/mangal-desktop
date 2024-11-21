@@ -1,5 +1,6 @@
 import {Command} from '@tauri-apps/plugin-shell'
 import * as logger from '@/services/logService'
+import {resolveResource} from '@tauri-apps/api/path'
 import type {SpawnOptions} from '@tauri-apps/plugin-shell'
 
 export async function download(title: string, source: string, chapterIndex: number, downloadFolder: string): Promise<string> {
@@ -32,15 +33,19 @@ async function runCommand(args: string[], options: SpawnOptions = {}): Promise<s
 
     return new Promise((resolve, reject) => {
         const argsToLog = 'mangal-cli ' + (Array.isArray(args) ? args.join(' ') : args)
+        const outputs: string[] = []
 
         command.stdout.on('data', (data) => {
-            logger.info('Command successfully executed:', argsToLog, data)
-            resolve(data)
+            outputs.push(data)
         })
 
-        command.stderr.on('data', (data) => {
-            logger.error('Error while executing command:', argsToLog, data)
-            reject(new Error(data))
+        command.on('close', () => {
+            resolve(outputs.length > 1 ? outputs.join(' ') : outputs[0])
+        })
+
+        command.on('error', (err) => {
+            logger.error('Error running command ' + argsToLog, err)
+            reject(new Error(err))
         })
     })
 }
