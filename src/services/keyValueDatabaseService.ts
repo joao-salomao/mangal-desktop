@@ -1,4 +1,3 @@
-import * as logger from '@tauri-apps/plugin-log'
 import {Store} from '@tauri-apps/plugin-store'
 
 // TODO: check if this is the correct way to use the store or if we should always call
@@ -16,6 +15,11 @@ export async function set<T>(key: string, value: T): Promise<void> {
     logger.info(`KeyValueDatabase: Set value for key "${key}": ${value}`)
     const store = await getStore()
     await store.set(key, value)
+}
+
+export async function has(key: string): Promise<boolean> {
+    const store = await getStore()
+    return store.has(key)
 }
 
 async function getStore(): Promise<Store> {
