@@ -21,7 +21,13 @@ export async function getChaptersAvailableToDownload(title: string, source: stri
 }
 
 async function runCommand(args: string[], options: SpawnOptions = {}): Promise<string> {
-    const command = Command.sidecar('binaries/mangal-cli', args, options)
+    const mangalConfigPath = await resolveResource('assets/mangal')
+
+    const command = Command.sidecar('binaries/mangal-cli', args, {
+        ...options,
+        env: {MANGAL_CONFIG_PATH: mangalConfigPath}
+    })
+
     await command.spawn()
 
     return new Promise((resolve, reject) => {
