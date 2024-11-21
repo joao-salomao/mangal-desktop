@@ -5,14 +5,21 @@ import {getAvailableSources} from '@/services/mangalCliService'
 import * as logger from '@/services/logService'
 import type Manga from '@/models/Manga'
 import {useToast} from 'primevue/usetoast'
+import {usePersistentState} from '@/composables/usePersistentState'
 
 export const useSearchStore = defineStore('search', () => {
     const loading = ref(false)
     const loadingSources = ref(false)
-    const form = ref({sources: [], search: ''})
     const sources = ref<string[]>([])
     const mangas = ref<Record<string, Manga[]>>({})
     const toast = useToast()
+
+    const form = usePersistentState({
+        key: 'search_store.form',
+        defaultValue: {sources: [], search: ''},
+        readTransformer: JSON.parse,
+        writeTransformer: JSON.stringify
+    })
 
     async function fetchSources() {
         try {
