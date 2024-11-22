@@ -12,6 +12,13 @@
             />
         </div>
         <div class="settings">
+            <div class="navigation-instructions">
+                <p>Navigation</p>
+                <small>Next page: Arrow Right, Right click</small>
+                <small>Previous page: Arrow Left, Left click</small>
+                <small>Scroll up: Arrow Up</small>
+                <small>Scroll down: Arrow Down</small>
+            </div>
             <p>Page: {{ currentPage }} / {{ pages }}</p>
             <div>
                 <label>Scale</label>
@@ -31,6 +38,7 @@ import {useFullscreen} from '@vueuse/core'
 import {onKeyStroke} from '@vueuse/core'
 import {usePersistentState} from '@/composables/usePersistentState'
 import {StoreKey} from '@/services/keyValueDatabaseService'
+import {useToast} from 'primevue/usetoast'
 
 // TODO: move component to a page
 // TODO: validate file existence
@@ -42,7 +50,7 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:visible'])
 
-const readerRef = ref<HTMLElement | null>(null)
+const readerRef = ref<HTMLDivElement | null>(null)
 const file = ref<Uint8Array | null>(null)
 const loading = ref(false)
 
@@ -65,18 +73,43 @@ const fullscreen = useFullscreen(readerRef, {
     autoExit: false,
 })
 
+const toast = useToast()
+
 function scrollToTop() {
     setTimeout(() => readerRef.value?.scrollBy(0, -9999999), 100)
 }
 
+function nextPage() {
+    currentPage.value = Math.min(currentPage.value + 1, pages.value)
+}
+
+function previousPage() {
+    currentPage.value = Math.max(currentPage.value - 1, 1)
+}
+
 onMounted(async () => {
     try {
+        readerRef.value?.addEventListener('contextmenu', (event: MouseEvent) => {
+            event.preventDefault()
+            nextPage()
+        })
+
+        readerRef.value?.addEventListener('click', () => {
+            previousPage()
+        })
+
         loading.value = true
         await fullscreen.enter()
         file.value = await readFile(props.chapterPath)
         logger.info(`Read file ${props.chapterPath}`)
     } catch (e) {
         logger.error(`Failed to read file ${props.chapterPath}`, e)
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: `Could not open reader. Error: ${e}`,
+            life: 5000,
+        })
     }
 })
 
@@ -96,25 +129,11 @@ watch(fullscreen.isFullscreen, () => {
     }
 })
 
-onKeyStroke('ArrowUp', () => {
-    readerRef.value?.scrollBy(0, -100)
-})
-
-onKeyStroke('ArrowDown', () => {
-    readerRef.value?.scrollBy(0, 100)
-})
-
-onKeyStroke('ArrowRight', () => {
-    currentPage.value = Math.min(currentPage.value + 1, pages.value)
-})
-
-onKeyStroke('ArrowLeft', () => {
-    currentPage.value = Math.max(currentPage.value - 1, 1)
-})
-
-onKeyStroke('Escape', () => {
-    fullscreen.exit()
-})
+onKeyStroke('ArrowUp', () => readerRef.value?.scrollBy(0, -100))
+onKeyStroke('ArrowDown', () => readerRef.value?.scrollBy(0, 100))
+onKeyStroke('ArrowLeft', previousPage)
+onKeyStroke('ArrowRight', nextPage)
+onKeyStroke('Escape', () => fullscreen.exit())
 </script>
 <style scoped>
 .reader-container {
@@ -141,6 +160,12 @@ onKeyStroke('Escape', () => {
         display: flex;
         flex-direction: column;
         justify-content: center;
+
+        .navigation-instructions {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 30px;
+        }
 
         :deep(.scale-input) {
             max-width: 45px;
