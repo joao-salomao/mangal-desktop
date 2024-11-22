@@ -5,10 +5,18 @@
     </div>
 
     <template v-else>
-        <VuePDF :key="page" v-for="page in pages" :pdf="pdf" :page="page"/>
-
-        <div class="actions">
-            Scale, scroll, and navigate with the arrow keys. Press Escape to exit fullscreen.
+        <div class="pdf-container">
+            <VuePDF class="pdf" :pdf="pdf" :page="currentPage"
+                    :scale="scale"
+                    :auto-destroy="true"
+            />
+        </div>
+        <div class="settings">
+            <p>Page: {{ currentPage }} / {{ pages }}</p>
+            <div>
+                <label>Scale</label>
+                <InputNumber input-class="scale-input" v-model="scale" :min="1" :max="2" :step="0.1"/>
+            </div>
         </div>
     </template>
 </div>
@@ -21,6 +29,11 @@ import {onMounted, ref, watch} from 'vue'
 import * as logger from '@/services/logService'
 import {useFullscreen} from '@vueuse/core'
 import {onKeyStroke} from '@vueuse/core'
+import {usePersistentState} from '@/composables/usePersistentState'
+import {StoreKey} from '@/services/keyValueDatabaseService'
+
+// TODO: move component to a page
+// TODO: validate file existence
 
 const props = defineProps<{
     visible: boolean,
@@ -32,6 +45,13 @@ const emit = defineEmits(['update:visible'])
 const readerRef = ref<HTMLElement | null>(null)
 const file = ref<Uint8Array | null>(null)
 const loading = ref(false)
+
+const currentPage = ref(1)
+const scale = usePersistentState({
+    key: StoreKey.READER_SCALE,
+    defaultValue: 1,
+    readTransformer: parseFloat,
+})
 
 const {pdf, pages} = usePDF(file, {
     onProgress: (progress) => {
@@ -45,6 +65,10 @@ const fullscreen = useFullscreen(readerRef, {
     autoExit: false,
 })
 
+function scrollToTop() {
+    setTimeout(() => readerRef.value?.scrollBy(0, -9999999), 100)
+}
+
 onMounted(async () => {
     try {
         loading.value = true
@@ -56,11 +80,11 @@ onMounted(async () => {
     }
 })
 
+
+watch(currentPage, scrollToTop)
 watch(loading, (newValue) => {
     if (!newValue) {
-        setTimeout(() => {
-            readerRef.value?.scrollBy(0, -9999999)
-        }, 100)
+        scrollToTop()
     }
 })
 
@@ -68,6 +92,7 @@ watch(fullscreen.isFullscreen, () => {
     visibleModel.value = fullscreen.isFullscreen.value
     if (!visibleModel.value) {
         file.value = null
+        currentPage.value = 1
     }
 })
 
@@ -77,6 +102,14 @@ onKeyStroke('ArrowUp', () => {
 
 onKeyStroke('ArrowDown', () => {
     readerRef.value?.scrollBy(0, 100)
+})
+
+onKeyStroke('ArrowRight', () => {
+    currentPage.value = Math.min(currentPage.value + 1, pages.value)
+})
+
+onKeyStroke('ArrowLeft', () => {
+    currentPage.value = Math.max(currentPage.value - 1, 1)
 })
 
 onKeyStroke('Escape', () => {
@@ -90,20 +123,29 @@ onKeyStroke('Escape', () => {
     align-items: center;
     justify-content: center;
     overflow-y: scroll;
+    background-color: var(--gray-800);
 
-    .pdf {
-        margin-bottom: 30px;
-    }
-
-    .actions {
-        position: fixed;
-        width: 100%;
-        bottom: 0;
-        left: 0;
-        width: 100%;
+    .pdf-container {
         display: flex;
         justify-content: center;
-        background-color: var(--gray-800)
+        align-items: center;
+        width: 100%;
+    }
+
+    .settings {
+        position: fixed;
+        width: 100%;
+        max-width: 300px;
+        bottom: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        :deep(.scale-input) {
+            max-width: 45px;
+            max-height: 30px;
+        }
     }
 }
 </style>
