@@ -6,6 +6,7 @@ import * as logger from '@/services/logService'
 import type Manga from '@/models/Manga'
 import {useToast} from 'primevue/usetoast'
 import {usePersistentState} from '@/composables/usePersistentState'
+import {StoreKey} from '@/services/keyValueDatabaseService'
 
 export const useSearchStore = defineStore('search', () => {
     const loading = ref(false)
@@ -15,7 +16,7 @@ export const useSearchStore = defineStore('search', () => {
     const toast = useToast()
 
     const form = usePersistentState({
-        key: 'search_store.form',
+        key: StoreKey.SEARCH_STORE_FORM,
         defaultValue: {sources: [], search: ''},
         readTransformer: JSON.parse,
         writeTransformer: JSON.stringify

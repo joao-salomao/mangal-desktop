@@ -1,6 +1,7 @@
-import {get, has, set} from '@/services/keyValueDatabaseService'
+import {get, has, set, StoreKey} from '@/services/keyValueDatabaseService'
 import {watchDebounced} from '@vueuse/core'
 import {onMounted, ref} from 'vue'
+
 
 /**
  * This composable provides a reactive state that is persisted with Tauri's key-value database. It reads the initial value
@@ -9,7 +10,7 @@ import {onMounted, ref} from 'vue'
  * to be any kind of object or primitive type and still have type support.
  */
 export function usePersistentState<T extends Object>(params: {
-    key: string
+    key: StoreKey,
     defaultValue: T,
     readTransformer?: (value: string) => T
     writeTransformer?: (value: T) => string
