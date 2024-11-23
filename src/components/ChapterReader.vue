@@ -76,7 +76,7 @@ const fullscreen = useFullscreen(readerRef, {
 const toast = useToast()
 
 function scrollToTop() {
-    setTimeout(() => readerRef.value?.scrollBy(0, -9999999), 100)
+    setTimeout(() => readerRef.value?.scrollTo({top: -9999999, behavior: 'smooth'}), 100)
 }
 
 function nextPage() {
@@ -129,6 +129,7 @@ watch(fullscreen.isFullscreen, () => {
     }
 })
 
+// TODO: implement smooth scrolling
 onKeyStroke('ArrowUp', () => readerRef.value?.scrollBy(0, -100))
 onKeyStroke('ArrowDown', () => readerRef.value?.scrollBy(0, 100))
 onKeyStroke('ArrowLeft', previousPage)
