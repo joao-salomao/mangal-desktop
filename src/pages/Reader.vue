@@ -9,7 +9,7 @@
     <template v-else>
         <div v-if="manga && downloadedChapter" class="chapter-presentation ">
             <h4>{{ manga.title }}</h4>
-            <h5>Chapter: {{ downloadedChapter.chapter }}</h5>
+            <h5>Chapter {{ downloadedChapter.chapter }}</h5>
         </div>
 
         <div class="pdf-container">
@@ -29,7 +29,7 @@
             <p>Page: {{ currentPage }} / {{ pages }}</p>
             <div @click.capture.prevent>
                 <label>Scale</label>
-                <InputNumber input-class="scale-input" v-model="scale" :min="1" :max="2" :step="0.1"/>
+                <InputNumber input-class="scale-input" v-model="scale" :min="0.1" :max="2" :step="0.1"/>
             </div>
         </div>
     </template>
@@ -253,7 +253,7 @@ onKeyStroke('Escape', () => {
         }
 
         :deep(.scale-input) {
-            max-width: 45px;
+            max-width: 50px;
             max-height: 30px;
         }
     }
