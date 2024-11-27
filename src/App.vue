@@ -1,15 +1,8 @@
-<script setup lang="ts">
-import Toast from 'primevue/toast'
-import ConfirmDialog from 'primevue/confirmdialog'
-import AppHeader from '@/components/AppHeader.vue'
-import ScrollTop from 'primevue/scrolltop'
-</script>
-
 <template>
 <div>
-    <AppHeader/>
+    <AppHeader v-if="!fullscreen.isFullscreen"/>
 
-    <main>
+    <main :class="{ fullscreen: fullscreen.isFullscreen }">
         <RouterView/>
     </main>
 
@@ -18,8 +11,17 @@ import ScrollTop from 'primevue/scrolltop'
     <ConfirmDialog/>
 </div>
 </template>
+<script setup lang="ts">
+import Toast from 'primevue/toast'
+import ConfirmDialog from 'primevue/confirmdialog'
+import AppHeader from '@/components/AppHeader.vue'
+import ScrollTop from 'primevue/scrolltop'
+import {useFullscreen} from '@/composables/useFullscreen.ts'
+
+const fullscreen = useFullscreen()
+</script>
 <style scoped>
-main {
+main:not(.fullscreen) {
     margin-top: 80px;
     flex: 1 1 auto;
 }

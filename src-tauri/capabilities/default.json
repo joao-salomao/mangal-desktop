@@ -82,6 +82,7 @@
     "sql:default",
     "sql:allow-execute",
     "os:default",
-    "fs:default"
+    "fs:default",
+    "core:window:allow-set-fullscreen"
   ]
 }

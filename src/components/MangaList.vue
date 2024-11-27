@@ -30,8 +30,8 @@
                                     :key="chapter.id"
                                     size="small"
                                     :label="chapter.chapter.toString()"
-                                    v-tooltip.top="`Open chapter ${chapter.chapter}: ${chapter.path}`"
-                                    @click="openDownloadedChapterFile(chapter)"
+                                    v-tooltip.top="`Open chapter reader`"
+                                    @click="openReader(item, chapter)"
                                 />
                             </div>
                         </div>
@@ -66,9 +66,6 @@
 
             <DownloadMangaChaptersDialog v-if="allowDownload" v-model:visible="showDownloadDialog"
                                          :manga="selectedManga"/>
-
-            <ChapterReader v-if="showChapterReader" v-model:visible="showChapterReader"
-                           :chapter-path="selectedChapter!.path"/>
         </div>
     </div>
 </div>
@@ -84,7 +81,6 @@ import {useConfirm} from 'primevue/useconfirm'
 import {isDownloadFolderSet} from '@/services/settingsService'
 import {useRouter} from 'vue-router'
 
-const ChapterReader = defineAsyncComponent(() => import('@/components/ChapterReader.vue'))
 const DownloadMangaChaptersDialog = defineAsyncComponent(() => import('@/components/DownloadMangaChaptersDialog.vue'))
 
 defineProps({
@@ -113,9 +109,6 @@ const router = useRouter()
 
 const showDownloadDialog = ref(false)
 const selectedManga = ref<Manga | null>(null)
-
-const showChapterReader = ref(false)
-const selectedChapter = ref<DownloadedChapter | null>(null)
 
 const mangasAddedToLibraryBySourceAndTitle = computed<Record<string, Record<string, boolean>>>(() => {
     const mangas = libraryStore.mangas
@@ -184,9 +177,12 @@ function removeFromLibraryHandler(manga: Manga) {
     })
 }
 
-function openDownloadedChapterFile(chapter: DownloadedChapter) {
-    showChapterReader.value = true
-    selectedChapter.value = chapter
+function openReader(manga: Manga, chapter: DownloadedChapter) {
+    router.push({
+        name: 'reader',
+        params: {mangaId: manga.id},
+        query: {chapterId: chapter.id, source: manga.source}
+    })
 }
 
 async function openDownloadDialog(manga: Manga) {

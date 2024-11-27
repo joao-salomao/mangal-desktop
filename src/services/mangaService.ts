@@ -4,7 +4,7 @@ import {MangaNotInLibraryError, DownloadFolderNotSetError} from '@/errors'
 import {getDownloadFolder} from '@/services/settingsService'
 import {pluck, chunk} from '@/utils/array'
 import DownloadedChapter from '@/models/DownloadedChapter'
-import * as db from '@/services/databaseService'
+import * as db from '@/services/sqliteDatabaseService'
 
 export async function download(manga: Manga, chapter: number): Promise<void> {
     if (!manga.id) {
