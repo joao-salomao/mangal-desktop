@@ -159,7 +159,6 @@ onMounted(async () => {
             event.preventDefault()
             nextPage()
         }
-
     })
 
     readerRef.value?.addEventListener('click', (event: MouseEvent) => {
