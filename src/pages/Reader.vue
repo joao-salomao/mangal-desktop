@@ -1,31 +1,32 @@
 <template>
 <div ref="readerRef" class="reader-container">
-    <div v-if="loading">
-        Loading...
-    </div>
+    asdasjldj
+<!--    <div v-if="loading">-->
+<!--        Loading...-->
+<!--    </div>-->
 
-    <template v-else>
-        <div class="pdf-container">
-            <VuePDF class="pdf" :pdf="pdf" :page="currentPage"
-                    :scale="scale"
-                    :auto-destroy="true"
-            />
-        </div>
-        <div class="settings">
-            <div class="navigation-instructions">
-                <p>Navigation</p>
-                <small>Next page: Arrow Right, Right click</small>
-                <small>Previous page: Arrow Left, Left click</small>
-                <small>Scroll up: Arrow Up</small>
-                <small>Scroll down: Arrow Down</small>
-            </div>
-            <p>Page: {{ currentPage }} / {{ pages }}</p>
-            <div>
-                <label>Scale</label>
-                <InputNumber input-class="scale-input" v-model="scale" :min="1" :max="2" :step="0.1"/>
-            </div>
-        </div>
-    </template>
+<!--    <template v-else>-->
+<!--        <div class="pdf-container">-->
+<!--            <VuePDF class="pdf" :pdf="pdf" :page="currentPage"-->
+<!--                    :scale="scale"-->
+<!--                    :auto-destroy="true"-->
+<!--            />-->
+<!--        </div>-->
+<!--        <div class="settings">-->
+<!--            <div class="navigation-instructions">-->
+<!--                <p>Navigation</p>-->
+<!--                <small>Next page: Arrow Right, Right click</small>-->
+<!--                <small>Previous page: Arrow Left, Left click</small>-->
+<!--                <small>Scroll up: Arrow Up</small>-->
+<!--                <small>Scroll down: Arrow Down</small>-->
+<!--            </div>-->
+<!--            <p>Page: {{ currentPage }} / {{ pages }}</p>-->
+<!--            <div>-->
+<!--                <label>Scale</label>-->
+<!--                <InputNumber input-class="scale-input" v-model="scale" :min="1" :max="2" :step="0.1"/>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </template>-->
 </div>
 </template>
 <script setup lang="ts">
@@ -40,15 +41,6 @@ import {usePersistentState} from '@/composables/usePersistentState'
 import {StoreKey} from '@/services/keyValueDatabaseService'
 import {useToast} from 'primevue/usetoast'
 
-// TODO: move component to a page
-// TODO: validate file existence
-
-const props = defineProps<{
-    visible: boolean,
-    chapterPath: string
-}>()
-
-const emit = defineEmits(['update:visible'])
 
 const readerRef = ref<HTMLDivElement | null>(null)
 const file = ref<Uint8Array | null>(null)
