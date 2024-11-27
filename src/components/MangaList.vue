@@ -109,7 +109,6 @@ const router = useRouter()
 
 const showDownloadDialog = ref(false)
 const selectedManga = ref<Manga | null>(null)
-const selectedChapter = ref<DownloadedChapter | null>(null)
 
 const mangasAddedToLibraryBySourceAndTitle = computed<Record<string, Record<string, boolean>>>(() => {
     const mangas = libraryStore.mangas
