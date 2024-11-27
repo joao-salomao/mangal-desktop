@@ -22,7 +22,7 @@ const fullscreen = useFullscreen()
 </script>
 <style scoped>
 main:not(.fullscreen) {
-    margin-top: 40px;
+    margin-top: 80px;
     flex: 1 1 auto;
 }
 </style>
