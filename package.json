@@ -9,7 +9,9 @@
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "prepare": "husky"
+    "prepare": "husky",
+    "generate-icons": "npm run tauri icon",
+    "download-custom-scrapers": "sh ./scripts/download_mangal_custom_scrapers.sh"
   },
   "dependencies": {
     "@tato30/vue-pdf": "^1.11.2",
