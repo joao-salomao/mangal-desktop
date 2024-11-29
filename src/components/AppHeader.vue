@@ -1,6 +1,6 @@
 <template>
 <div class="app-header">
-    <Menubar :model="items">
+    <Menubar :model="items" breakpoint="1px">
         <template #start>
             <span class="app-name">Mangal Desktop</span>
         </template>
