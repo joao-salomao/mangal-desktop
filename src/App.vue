@@ -1,5 +1,6 @@
 <template>
 <div>
+    <button @click="callMyCOmmand">CALL MY COMMAND</button>
     <AppHeader v-if="!fullscreen.isFullscreen"/>
 
     <main :class="{ fullscreen: fullscreen.isFullscreen }">
@@ -17,8 +18,16 @@ import ConfirmDialog from 'primevue/confirmdialog'
 import AppHeader from '@/components/AppHeader.vue'
 import ScrollTop from 'primevue/scrolltop'
 import {useFullscreen} from '@/composables/useFullscreen.ts'
+import { invoke } from '@tauri-apps/api/core';
+import * as logger from '@/services/logService'
 
 const fullscreen = useFullscreen()
+
+function callMyCOmmand() {
+    invoke('get_available_sources').then((res) => {
+        logger.info(res)
+    })
+}
 </script>
 <style scoped>
 main:not(.fullscreen) {

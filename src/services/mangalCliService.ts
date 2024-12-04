@@ -2,6 +2,7 @@ import {Command} from '@tauri-apps/plugin-shell'
 import * as logger from '@/services/logService'
 import {resolveResource} from '@tauri-apps/api/path'
 import type {SpawnOptions} from '@tauri-apps/plugin-shell'
+import {invoke} from '@tauri-apps/api/core'
 
 export async function download(title: string, source: string, chapterIndex: number, downloadFolder: string): Promise<string> {
     return await runCommand({
@@ -27,12 +28,9 @@ export async function getChaptersAvailableToDownload(title: string, source: stri
 }
 
 export async function getAvailableSources(): Promise<string[]> {
-    const output = await runCommand({
-        args: ['sources', 'list', '-r'],
-        sync: true
-    })
-
-    return output.split('\n').map(s => s.trim()).filter(s => !!s)
+    const result = await invoke<string[]>('get_available_sources')
+    logger.info('Available sources', result)
+    return result
 }
 
 async function runCommand(params: {

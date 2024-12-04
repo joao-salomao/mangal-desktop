@@ -1,3 +1,5 @@
+mod mangal_cli;
+
 use tauri_plugin_sql::{Migration, MigrationKind};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -64,6 +66,9 @@ pub fn run() {
                 ))
                 .build()
         )
+        .invoke_handler(tauri::generate_handler![
+            mangal_cli::get_available_sources
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
